@@ -99,21 +99,26 @@ public class AuthorizationServerConfig {
 		RegisteredClient client = RegisteredClient
 				.withId("ddd")
 				.clientId("ddd")
+				// {noop} 这个是说NoOpPasswordEncoder
+				// https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html
 				.clientSecret("{noop}ddd")
 				// 授权方式
 				.clientAuthenticationMethods(clientAuthenticationMethods -> {
 					clientAuthenticationMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC);
 					clientAuthenticationMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_JWT);
 					clientAuthenticationMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_POST);
+					clientAuthenticationMethods.add(ClientAuthenticationMethod.PRIVATE_KEY_JWT);
 				})
 				// 授权类型
 				.authorizationGrantTypes(authorizationGrantTypes -> {
 					authorizationGrantTypes.add(AuthorizationGrantType.AUTHORIZATION_CODE);
 					authorizationGrantTypes.add(AuthorizationGrantType.REFRESH_TOKEN);
 					authorizationGrantTypes.add(AuthorizationGrantType.CLIENT_CREDENTIALS);
+					authorizationGrantTypes.add(AuthorizationGrantType.JWT_BEARER);
+					authorizationGrantTypes.add(AuthorizationGrantType.PASSWORD);
 				})
-				.redirectUri("https://baidu.com")
 				// 回调地址名单，不在此列将被拒绝 而且只能使用IP或者域名  不能使用 localhost
+				.redirectUri("https://baidu.com")
 				// .redirectUri("http://127.0.0.1:8080/authorized")
 				// JWT的配置项 包括TTL  是否复用refreshToken等等
 				.scope("USER")
