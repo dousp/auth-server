@@ -4,6 +4,8 @@
 
 ### 请求授权码
 - state随机生成
+- state 参数用于防止 XSRF.应用程序生成一个随机字符串并使用 state 参数将其发送到授权服务器.授权服务器发回状态参数.如果两个状态相同 => OK.如果状态参数不同，则是其他人发起了请求.
+- 这个我记得在oauth2规范中也有说明，https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1
 
 ```
 GET
