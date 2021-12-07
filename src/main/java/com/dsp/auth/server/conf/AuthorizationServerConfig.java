@@ -99,21 +99,26 @@ public class AuthorizationServerConfig {
 		RegisteredClient client = RegisteredClient
 				.withId("ddd")
 				.clientId("ddd")
+				// {noop} 这个是说NoOpPasswordEncoder
+				// https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html
 				.clientSecret("{noop}ddd")
 				// 授权方式
 				.clientAuthenticationMethods(clientAuthenticationMethods -> {
 					clientAuthenticationMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC);
 					clientAuthenticationMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_JWT);
 					clientAuthenticationMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_POST);
+					clientAuthenticationMethods.add(ClientAuthenticationMethod.PRIVATE_KEY_JWT);
 				})
 				// 授权类型
 				.authorizationGrantTypes(authorizationGrantTypes -> {
 					authorizationGrantTypes.add(AuthorizationGrantType.AUTHORIZATION_CODE);
 					authorizationGrantTypes.add(AuthorizationGrantType.REFRESH_TOKEN);
 					authorizationGrantTypes.add(AuthorizationGrantType.CLIENT_CREDENTIALS);
+					authorizationGrantTypes.add(AuthorizationGrantType.JWT_BEARER);
+					authorizationGrantTypes.add(AuthorizationGrantType.PASSWORD);
 				})
-				.redirectUri("https://baidu.com")
 				// 回调地址名单，不在此列将被拒绝 而且只能使用IP或者域名  不能使用 localhost
+				.redirectUri("https://baidu.com")
 				// .redirectUri("http://127.0.0.1:8080/authorized")
 				// JWT的配置项 包括TTL  是否复用refreshToken等等
 				.scope("USER")
@@ -153,105 +158,4 @@ public class AuthorizationServerConfig {
 		return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
 	}
 
-	// @SneakyThrows
-	// @Bean
-	// public JWKSource<SecurityContext> jwkSource() {
-	// 	//TODO 这里优化到配置
-	// 	String path = "dd.jks";
-	// 	String alias = "dd";
-	// 	String pass = "123456";
-	//
-	// 	ClassPathResource resource = new ClassPathResource(path);
-	// 	KeyStore jks = KeyStore.getInstance("jks");
-	// 	char[] pin = pass.toCharArray();
-	// 	jks.load(resource.getInputStream(), pin);
-	// 	RSAKey rsaKey = RSAKey.load(jks, alias, pin);
-	//
-	// 	JWKSet jwkSet = new JWKSet(rsaKey);
-	// 	return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
-	// }
-
-	/**
-	 * 有需要就的话，就声明一个JwtDecoder进行定制
-	 *
-	 * @param jwkSource JSON Web Key (JWK) source
-	 * @return JwtDecoder
-	 */
-	// @Bean
-	public static JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
-		Set<JWSAlgorithm> jwsAlgorithm = new HashSet<>();
-		jwsAlgorithm.addAll(JWSAlgorithm.Family.RSA);
-		jwsAlgorithm.addAll(JWSAlgorithm.Family.EC);
-		jwsAlgorithm.addAll(JWSAlgorithm.Family.HMAC_SHA);
-		JWSKeySelector<SecurityContext> jwsKeySelector = new JWSVerificationKeySelector<>(jwsAlgorithm, jwkSource);
-		ConfigurableJWTProcessor<SecurityContext> jwtProcessor = new DefaultJWTProcessor<>();
-		jwtProcessor.setJWSKeySelector(jwsKeySelector);
-		// jwtProcessor.setJWTClaimsSetVerifier(new DefaultJWTClaimsVerifier(
-		//         //exact match claims
-		//         validClaims,
-		//         //Required claims
-		//         new HashSet<>(Arrays.asList("exp", "sub","iss"))));
-		jwtProcessor.setJWTClaimsSetVerifier((claims, context) -> {
-			// todo Override the default Nimbus claims set verifier as NimbusJwtDecoder handles it instead
-			// iss: jwt签发者
-			// sub: jwt所面向的用户
-			// aud: 接收jwt的一方
-			// exp: jwt的过期时间，这个过期时间必须要大于签发时间
-			// nbf: 定义在什么时间之前，该jwt都是不可用的.
-			// iat: jwt的签发时间
-			// jti: jwt的唯一身份标识，主要用来作为一次性token,从而回避重放攻击
-		});
-		return new NimbusJwtDecoder(jwtProcessor);
-	}
-
-	/**
-	 * 对jwt token 进行增强，如果有需要的话
-	 *
-	 * @return oauth 2 token customizer
-	 */
-	// @Bean
-	OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
-		return jwtEncodingContext -> {
-			JwtClaimsSet.Builder claims = jwtEncodingContext.getClaims();
-			claims.claim("dd", "dd");
-			JwtEncodingContext.with(jwtEncodingContext.getHeaders(), claims);
-		};
-	}
-
-	/**
-	 * OAuth2授权信息持久化
-	 * 记录授权的资源拥有者（Resource Owner）对某个客户端的某次授权记录
-	 * 实体： OAuth2Authorization
-	 * table: oauth2_authorization
-	 */
-	// @Bean
-	public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
-		return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
-	}
-
-	/**
-	 * 确认授权持久化
-	 * 资源拥有者（Resource Owner）对授权的确认信息OAuth2AuthorizationConsent的持久化
-	 * resource owner已授予client的相关权限信息
-	 * 实体：OAuth2AuthorizationConsent
-	 * table: oauth2_authorization_consent
-	 */
-	// @Bean
-	public OAuth2AuthorizationConsentService authorizationConsentService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
-		return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository);
-	}
-
-	// @Bean
-	public EmbeddedDatabase embeddedDatabase() {
-		// @formatter:off
-		return new EmbeddedDatabaseBuilder()
-				.generateUniqueName(true)
-				.setType(EmbeddedDatabaseType.H2)
-				.setScriptEncoding("UTF-8")
-				.addScript("org/springframework/security/oauth2/server/authorization/oauth2-authorization-schema.sql")
-				.addScript("org/springframework/security/oauth2/server/authorization/oauth2-authorization-consent-schema.sql")
-				.addScript("org/springframework/security/oauth2/server/authorization/client/oauth2-registered-client-schema.sql")
-				.build();
-		// @formatter:on
-	}
 }
