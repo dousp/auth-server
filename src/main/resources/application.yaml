@@ -1,0 +1,24 @@
+server:
+  port: 8080
+
+oauth2:
+  security:
+    key-path: oauth2.jks
+    key-alias: oauth2
+    key-pass: 123456
+
+spring:
+  application:
+    name: auth-server
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+        trace: true
+
+logging:
+  level:
+    org.springframework.web: debug
+    org.springframework.security: debug
+    org.springframework.security.oauth2: debug
