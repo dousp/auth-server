@@ -23,7 +23,6 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -32,7 +31,6 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.authorization.*;
-import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -82,13 +80,13 @@ public class AuthorizationServerConfig {
 				= authorizationServerConfigurer.getEndpointsMatcher();
 		// 授权服务器相关请求端点
 		http.requestMatcher(endpointsMatcher)
-			.authorizeRequests(authorizeRequests ->
-					authorizeRequests.anyRequest().authenticated()
-			)
-			.csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
-			.formLogin(Customizer.withDefaults())
-			// 授权服务器配置
-			.apply(authorizationServerConfigurer);
+				.authorizeRequests(authorizeRequests ->
+						authorizeRequests.anyRequest().authenticated()
+				)
+				.csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
+				.formLogin(Customizer.withDefaults())
+				// 授权服务器配置
+				.apply(authorizationServerConfigurer);
 		return http.build();
 	}
 
@@ -195,6 +193,7 @@ public class AuthorizationServerConfig {
 
 	/**
 	 * 对JWT进行签名的 加解密密钥
+	 *
 	 * @return The matching JWKs, empty list if no matches were found.
 	 */
 	// @Bean
@@ -215,6 +214,7 @@ public class AuthorizationServerConfig {
 
 	/**
 	 * 对JWT进行签名的加解密密钥
+	 *
 	 * @return The matching JWKs, empty list if no matches were found.
 	 */
 	@Bean
@@ -277,7 +277,7 @@ public class AuthorizationServerConfig {
 		return jwtEncodingContext -> {
 			JoseHeader.Builder joseHeader = jwtEncodingContext.getHeaders();
 			joseHeader.header("client-id", jwtEncodingContext.getRegisteredClient().getClientId())
-					.header("dd","dd");
+					.header("dd", "dd");
 			JwtClaimsSet.Builder claims = jwtEncodingContext.getClaims();
 			claims.claim("dd", "dd");
 			JwtEncodingContext.with(jwtEncodingContext.getHeaders(), claims);

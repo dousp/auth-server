@@ -9,22 +9,21 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("oauth2.security")
 public class Oauth2SecurityProperties {
 
-    private String keyPath;
+	private String keyPath;
 
-    private String keyAlias;
+	private String keyAlias;
 
-    private String keyPass;
+	private String keyPass;
 
 
-    /**
-     * token 有效期， 分钟为单位
-     */
-    private Long accessTokenValidityMinutes = 30L;
-    /**
-     * refreshToken 有效期， 分钟为单位
-     */
-    private Long refreshTokenValidityMinutes = 180L;
-
+	/**
+	 * token 有效期， 分钟为单位
+	 */
+	private Long accessTokenValidityMinutes = 30L;
+	/**
+	 * refreshToken 有效期， 分钟为单位
+	 */
+	private Long refreshTokenValidityMinutes = 180L;
 
 
 }
