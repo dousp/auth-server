@@ -32,3 +32,6 @@ curl --location --request POST 'localhost:8080/oauth2/token' \
 --data-urlencode 'code=dVMJE3tW0HlnJsI_clTx15UvW0JOlxZxRnCQyDCzzw9P7chdmczjDTBBxDzlfDLfvd6NevYdYCs4PlqhYKXmoDv6yqqkerBpxFIllDqTysRlEKJAwUY7LcycrcWwtaDD'
 
 ```
+
+**_注意，mac.dou.com、auth-server.com需要自己配置host_**
+**_注意，client配置provider要与授权服务器配置的 http://auth-server.com 保持一致，即issuer-uri要一致_**
