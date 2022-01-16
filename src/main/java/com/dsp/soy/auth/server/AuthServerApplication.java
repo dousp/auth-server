@@ -1,4 +1,4 @@
-package com.dsp.auth.server;
+package com.dsp.soy.auth.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

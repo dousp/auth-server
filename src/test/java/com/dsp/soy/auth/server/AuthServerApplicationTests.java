@@ -1,4 +1,4 @@
-package com.dsp.auth.server;
+package com.dsp.soy.auth.server;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
