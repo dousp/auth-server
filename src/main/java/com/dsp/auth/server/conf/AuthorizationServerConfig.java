@@ -19,7 +19,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -41,7 +40,6 @@ import org.springframework.security.oauth2.server.authorization.config.TokenSett
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import javax.annotation.Resource;
@@ -73,14 +71,14 @@ public class AuthorizationServerConfig {
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
         // 默认的话就用这个
-       // OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-       // http
-       //         // Redirect to the login page when not authenticated from the
-       //         // authorization endpoint
-       //         .exceptionHandling((exceptions) -> exceptions
-       //                 .authenticationEntryPoint(
-       //                         new LoginUrlAuthenticationEntryPoint("/login"))
-       //         );
+        // OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+        // http
+        //         // Redirect to the login page when not authenticated from the
+        //         // authorization endpoint
+        //         .exceptionHandling((exceptions) -> exceptions
+        //                 .authenticationEntryPoint(
+        //                         new LoginUrlAuthenticationEntryPoint("/login"))
+        //         );
         OAuth2AuthorizationServerConfigurer<HttpSecurity> authorizationServerConfigurer
                 = new OAuth2AuthorizationServerConfigurer<>();
         // 可以根据需求对OAuth2AuthorizationServerConfiguration进行个性化设置
@@ -88,17 +86,17 @@ public class AuthorizationServerConfig {
                 = authorizationServerConfigurer.getEndpointsMatcher();
         // 授权服务器相关请求端点
         http.requestMatcher(endpointsMatcher)
-                .authorizeRequests(authorizeRequests ->
-                        authorizeRequests
-                                .antMatchers("/oauth/**", "/login/**", "/logout/**")
-                                .permitAll()
-                                .anyRequest()
-                                .authenticated()
-                )
-                .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
-//                .formLogin(Customizer.withDefaults())
-                // 授权服务器配置
-                .apply(authorizationServerConfigurer);
+            .authorizeRequests(authorizeRequests ->
+                    authorizeRequests
+                            // .antMatchers("/oauth/**", "/login/**", "/logout/**")
+                            // .permitAll()
+                            .anyRequest()
+                            .authenticated()
+            )
+            .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
+            .formLogin(Customizer.withDefaults())
+            // 授权服务器配置
+            .apply(authorizationServerConfigurer);
 
         return http.build();
     }
@@ -140,7 +138,7 @@ public class AuthorizationServerConfig {
                     authorizationGrantTypes.add(AuthorizationGrantType.PASSWORD);
                 })
                 // 回调地址名单，不在此列将被拒绝 而且只能使用IP或者域名  不能使用 localhost
-                .redirectUri("http://mac.dou.com:8080/foo/bar")
+                .redirectUri("https://baidu.com")
                 .redirectUri("http://127.0.0.1:8080/login/oauth2/code/messaging-client-oidc")
                 .redirectUri("http://127.0.0.1:8080/authorized")
                 // 客户端申请的作用域，也可以理解这个客户端申请访问用户的哪些信息
