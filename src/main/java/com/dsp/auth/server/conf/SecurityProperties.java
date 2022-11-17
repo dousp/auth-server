@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 @ConfigurationProperties("oauth2.security")
-public class Oauth2SecurityProperties {
+public class SecurityProperties {
 
 	private String keyPath;
 

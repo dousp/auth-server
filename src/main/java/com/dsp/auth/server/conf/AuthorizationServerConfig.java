@@ -60,7 +60,7 @@ import java.util.Set;
 public class AuthorizationServerConfig {
 
     @Resource
-    private Oauth2SecurityProperties properties;
+    private SecurityProperties properties;
 
 
     /**
