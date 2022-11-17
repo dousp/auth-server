@@ -16,9 +16,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -40,6 +42,7 @@ import org.springframework.security.oauth2.server.authorization.token.JwtEncodin
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import javax.annotation.Resource;
 import java.security.KeyPair;
@@ -70,14 +73,32 @@ public class AuthorizationServerConfig {
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
         // 默认的话就用这个
-        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-        http
-                // Redirect to the login page when not authenticated from the
-                // authorization endpoint
-                .exceptionHandling((exceptions) -> exceptions
-                        .authenticationEntryPoint(
-                                new LoginUrlAuthenticationEntryPoint("/login"))
-                );
+       // OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+       // http
+       //         // Redirect to the login page when not authenticated from the
+       //         // authorization endpoint
+       //         .exceptionHandling((exceptions) -> exceptions
+       //                 .authenticationEntryPoint(
+       //                         new LoginUrlAuthenticationEntryPoint("/login"))
+       //         );
+        OAuth2AuthorizationServerConfigurer<HttpSecurity> authorizationServerConfigurer
+                = new OAuth2AuthorizationServerConfigurer<>();
+        // 可以根据需求对OAuth2AuthorizationServerConfiguration进行个性化设置
+        RequestMatcher endpointsMatcher
+                = authorizationServerConfigurer.getEndpointsMatcher();
+        // 授权服务器相关请求端点
+        http.requestMatcher(endpointsMatcher)
+                .authorizeRequests(authorizeRequests ->
+                        authorizeRequests
+                                .antMatchers("/oauth/**", "/login/**", "/logout/**")
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated()
+                )
+                .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
+//                .formLogin(Customizer.withDefaults())
+                // 授权服务器配置
+                .apply(authorizationServerConfigurer);
 
         return http.build();
     }
