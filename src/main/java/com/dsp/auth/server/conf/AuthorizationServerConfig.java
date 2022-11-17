@@ -291,6 +291,7 @@ public class AuthorizationServerConfig {
     // public AuthorizationServerSettings authorizationServerSettings() {
     //     return AuthorizationServerSettings.builder().build();
     // }
+    
     private static KeyPair generateRsaKey() {
         KeyPair keyPair;
         try {
