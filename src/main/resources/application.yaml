@@ -19,6 +19,7 @@ spring:
 
 logging:
   level:
-    org.springframework.web: debug
-    org.springframework.security: debug
+    org.springframework.web: info
+    org.springframework.security: info
+    org.springframework.security.core: debug
     org.springframework.security.oauth2: debug

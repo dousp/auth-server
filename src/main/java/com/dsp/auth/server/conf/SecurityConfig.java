@@ -27,14 +27,18 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf().disable()
-                .authorizeHttpRequests((authorize) -> authorize
-                        .anyRequest().authenticated()
-                )
-                // Form login handles the redirect to the login page from the authorization server filter chain
-                // 允许用户使用基于表单的登录进行身份验证
-                .formLogin(Customizer.withDefaults())
+        http.csrf().disable()
+            .authorizeHttpRequests((authorize) -> authorize
+                    .antMatchers("/oauth/**", "/login/**", "/logout/**")
+                    .permitAll()
+                    .antMatchers("/actuator/health","/h2-console/**")
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated()
+            )
+            // Form login handles the redirect to the login page from the authorization server filter chain
+            // 允许用户使用基于表单的登录进行身份验证
+            .formLogin(Customizer.withDefaults())
         // 允许用户使用 HTTP Basic 身份验证进行身份验证
         // .httpBasic(Customizer.withDefaults())
         ;
@@ -52,15 +56,6 @@ public class SecurityConfig {
         return new InMemoryUserDetailsManager(user);
     }
 
-    /**
-     * Web security customizer web security customizer.
-     *
-     * @return the web security customizer
-     */
-    @Bean
-    WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().antMatchers("/actuator/health", "/h2-console/**");
-    }
 
 
 }
