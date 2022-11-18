@@ -1,4 +1,4 @@
-package com.dsp.soy.auth.server.conf;
+package com.dsp.auth.server.conf;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

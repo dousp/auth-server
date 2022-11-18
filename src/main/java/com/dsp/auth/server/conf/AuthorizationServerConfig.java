@@ -1,4 +1,4 @@
-package com.dsp.soy.auth.server.conf;
+package com.dsp.auth.server.conf;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;

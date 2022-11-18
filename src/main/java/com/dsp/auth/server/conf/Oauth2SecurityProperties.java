@@ -1,4 +1,4 @@
-package com.dsp.soy.auth.server.conf;
+package com.dsp.auth.server.conf;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
