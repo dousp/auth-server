@@ -10,12 +10,20 @@ oauth2:
 spring:
   application:
     name: auth-server
-  h2:
-    console:
-      enabled: true
-      settings:
-        web-allow-others: true
-        trace: true
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:23306/auth?useSSL=false&useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: 123456
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      #空闲连接最大存活时间（毫秒）
+      idle-timeout: 60000
+      #池中连接的最长生命周期，值 0 表示无限生命周期（毫秒）
+      max-lifetime: 600000
+      #连接到数据库时等待最长时间(秒)
+      login-timeout: 5
 
 logging:
   level:

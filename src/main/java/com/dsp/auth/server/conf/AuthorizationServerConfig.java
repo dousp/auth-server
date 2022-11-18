@@ -40,6 +40,7 @@ import org.springframework.security.oauth2.server.authorization.config.TokenSett
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import javax.annotation.Resource;
@@ -86,17 +87,23 @@ public class AuthorizationServerConfig {
                 = authorizationServerConfigurer.getEndpointsMatcher();
         // 授权服务器相关请求端点
         http.requestMatcher(endpointsMatcher)
-            .authorizeRequests(authorizeRequests ->
-                    authorizeRequests
-                            // .antMatchers("/oauth/**", "/login/**", "/logout/**")
-                            // .permitAll()
-                            .anyRequest()
-                            .authenticated()
-            )
-            .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
-            .formLogin(Customizer.withDefaults())
-            // 授权服务器配置
-            .apply(authorizationServerConfigurer);
+                // Redirect to the login page when not authenticated from the
+                // authorization endpoint
+                .exceptionHandling((exceptions) -> exceptions
+                        .authenticationEntryPoint(
+                                new LoginUrlAuthenticationEntryPoint("/login"))
+                )
+                .authorizeRequests(authorizeRequests ->
+                        authorizeRequests
+                                // .antMatchers("/oauth/**", "/login/**", "/logout/**")
+                                // .permitAll()
+                                .anyRequest()
+                                .authenticated()
+                )
+                .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
+                .formLogin(Customizer.withDefaults())
+                // 授权服务器配置
+                .apply(authorizationServerConfigurer);
 
         return http.build();
     }
@@ -143,7 +150,7 @@ public class AuthorizationServerConfig {
                 .redirectUri("http://127.0.0.1:8080/authorized")
                 // 客户端申请的作用域，也可以理解这个客户端申请访问用户的哪些信息
                 .scope(OidcScopes.OPENID)
-                .scope("USER")
+                .scope("user")
                 .scope("msg.write")
                 .scope("msg.read")
                 // 配置token
@@ -282,16 +289,6 @@ public class AuthorizationServerConfig {
                 .build();
     }
 
-    /**
-     * 这个0.4版本才有。。。。
-     *
-     * @return
-     */
-    // @Bean
-    // public AuthorizationServerSettings authorizationServerSettings() {
-    //     return AuthorizationServerSettings.builder().build();
-    // }
-    
     private static KeyPair generateRsaKey() {
         KeyPair keyPair;
         try {
@@ -303,4 +300,15 @@ public class AuthorizationServerConfig {
         }
         return keyPair;
     }
+
+    /**
+     * 这个0.4版本才有。。。。
+     *
+     * @return
+     */
+    // @Bean
+    // public AuthorizationServerSettings authorizationServerSettings() {
+    //     return AuthorizationServerSettings.builder().build();
+    // }
+
 }
