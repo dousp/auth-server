@@ -12,7 +12,7 @@ spring:
     name: auth-server
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:23306/auth?useSSL=false&useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://127.0.0.1:23306/auth?useSSL=false&useUnicode=true&characterEncoding=utf-8
     username: root
     password: 123456
     hikari:

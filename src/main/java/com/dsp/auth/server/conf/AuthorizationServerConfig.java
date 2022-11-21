@@ -19,7 +19,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
@@ -39,17 +42,20 @@ import org.springframework.security.oauth2.server.authorization.config.ProviderS
 import org.springframework.security.oauth2.server.authorization.config.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import javax.annotation.Resource;
+import javax.sql.DataSource;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * 授权服务器配置
@@ -66,118 +72,78 @@ public class AuthorizationServerConfig {
 
 
     /**
-     * 授权服务器默认设置
+     * 授权服务器的协议端点
+     * 授权：赋予已经通过认证的客户相关权限
+     * Spring Security 过滤器链
+     *
+     * @see <a href="https://docs.spring.io/spring-authorization-server/docs/current/reference/html/protocol-endpoints.html">...</a>
      */
     @Bean
     @Order(1)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
         // 默认的话就用这个
-        // OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-        // http
-        //         // Redirect to the login page when not authenticated from the
-        //         // authorization endpoint
-        //         .exceptionHandling((exceptions) -> exceptions
-        //                 .authenticationEntryPoint(
-        //                         new LoginUrlAuthenticationEntryPoint("/login"))
-        //         );
-        OAuth2AuthorizationServerConfigurer<HttpSecurity> authorizationServerConfigurer
-                = new OAuth2AuthorizationServerConfigurer<>();
-        // 可以根据需求对OAuth2AuthorizationServerConfiguration进行个性化设置
-        RequestMatcher endpointsMatcher
-                = authorizationServerConfigurer.getEndpointsMatcher();
-        // 授权服务器相关请求端点
-        http.requestMatcher(endpointsMatcher)
-                // Redirect to the login page when not authenticated from the
-                // authorization endpoint
+        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+        return http
                 .exceptionHandling((exceptions) -> exceptions
                         .authenticationEntryPoint(
+                                // 未从授权端点进行身份验证时重定向到登录页面
                                 new LoginUrlAuthenticationEntryPoint("/login"))
                 )
-                .authorizeRequests(authorizeRequests ->
-                        authorizeRequests
-                                // .antMatchers("/oauth/**", "/login/**", "/logout/**")
-                                // .permitAll()
-                                .anyRequest()
-                                .authenticated()
-                )
-                .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
-                .formLogin(Customizer.withDefaults())
-                // 授权服务器配置
-                .apply(authorizationServerConfigurer);
+                .build();
+    }
 
+    /**
+     * 配置需要认证的资源，用于身份验证
+     * 认证：对使用服务的人的身份核实
+     * Spring Security 过滤器链
+     * @see <a href="https://docs.spring.io/spring-security/reference/servlet/authentication/index.html">...</a>
+     */
+    @Bean
+    @Order(2)
+    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf().disable()
+                .authorizeHttpRequests((authorize) -> authorize
+                        .antMatchers("/oauth/**", "/login/**", "/logout/**")
+                        .permitAll()
+                        .antMatchers("/actuator/health","/h2-console/**")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated()
+                )
+                // Form login handles the redirect to the login page from the authorization server filter chain
+                // 允许用户使用基于表单的登录进行身份验证
+                .formLogin(Customizer.withDefaults())
+        // 允许用户使用 HTTP Basic 身份验证进行身份验证
+        // .httpBasic(Customizer.withDefaults())
+        ;
         return http.build();
     }
 
     /**
-     * OAuth2.0客户端信息持久化
+     * 用户信息来源
+     *
+     * @see UserDetailsService 用于检索用户进行身份验证的实例。
+     */
+    @Bean
+    public UserDetailsService userDetailsService(DataSource dataSource) {
+        return new JdbcUserDetailsManager(dataSource);
+    }
+
+    /**
+     * 客户端信息持来源
      * 授权服务器要求客户端必须是已经注册的，避免非法的客户端发起授权申请
      * 实体： RegisteredClient
+     * @see RegisteredClientRepository 用于管理客户端的实例。
      * table: oauth2_registered_client
      * 操作该表的JDBC服务接口： RegisteredClientRepository
      */
     @Bean
     public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
-
-        RegisteredClient client = RegisteredClient
-                // .withId(UUID.randomUUID().toString())
-                .withId("ddd")
-                .clientId("ddd")
-                // {noop} 这个是说NoOpPasswordEncoder
-                // https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html
-                .clientSecret("{noop}ddd")
-                // 授权方式
-                // .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .clientAuthenticationMethods(clientAuthenticationMethods -> {
-                    clientAuthenticationMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC);
-                    clientAuthenticationMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_JWT);
-                    clientAuthenticationMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_POST);
-                    clientAuthenticationMethods.add(ClientAuthenticationMethod.PRIVATE_KEY_JWT);
-                })
-                // 授权类型
-                // .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                // .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                // .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .authorizationGrantTypes(authorizationGrantTypes -> {
-                    authorizationGrantTypes.add(AuthorizationGrantType.AUTHORIZATION_CODE);
-                    authorizationGrantTypes.add(AuthorizationGrantType.REFRESH_TOKEN);
-                    authorizationGrantTypes.add(AuthorizationGrantType.CLIENT_CREDENTIALS);
-                    authorizationGrantTypes.add(AuthorizationGrantType.JWT_BEARER);
-                    authorizationGrantTypes.add(AuthorizationGrantType.PASSWORD);
-                })
-                // 回调地址名单，不在此列将被拒绝 而且只能使用IP或者域名  不能使用 localhost
-                .redirectUri("https://baidu.com")
-                .redirectUri("http://127.0.0.1:8080/login/oauth2/code/messaging-client-oidc")
-                .redirectUri("http://127.0.0.1:8080/authorized")
-                // 客户端申请的作用域，也可以理解这个客户端申请访问用户的哪些信息
-                .scope(OidcScopes.OPENID)
-                .scope("user")
-                .scope("msg.write")
-                .scope("msg.read")
-                // 配置token
-                // 是否需要用户确认一下客户端需要获取用户的哪些权限
-                // 比如：客户端需要获取用户的 用户信息、用户照片 但是此处用户可以控制只给客户端授权获取 用户信息。
-                .tokenSettings(TokenSettings.builder()
-                        // 是否可重用刷新令牌
-                        .reuseRefreshTokens(true)
-                        // accessToken 的有效期
-                        .accessTokenTimeToLive(Duration.ofHours(1))
-                        // refreshToken 的有效期
-                        .refreshTokenTimeToLive(Duration.ofHours(3))
-                        .build()
-                )
-                // 配置客户端相关的配置项，包括验证密钥或者 是否需要授权页面
-                .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
-                .build();
-
-        JdbcRegisteredClientRepository registeredClientRepository = new JdbcRegisteredClientRepository(jdbcTemplate);
-        // 初始化一个客户端到db中
-        if (null == registeredClientRepository.findByClientId("ddd")) {
-            registeredClientRepository.save(client);
-        }
-        return registeredClientRepository;
+        return new JdbcRegisteredClientRepository(jdbcTemplate);
     }
 
     /**
+     * 授权码、授权Token、刷新Token 持久化
      * OAuth2授权信息持久化，记录授权的资源拥有者（Resource Owner）对某个客户端的某次授权记录
      * <p>实体： OAuth2Authorization</p>
      * <p>table: oauth2_authorization</p>
@@ -188,7 +154,8 @@ public class AuthorizationServerConfig {
     }
 
     /**
-     * 确认授权持久化，资源拥有者（Resource Owner）对授权的确认信息OAuth2AuthorizationConsent的持久化
+     * 确认授权持久化
+     * 资源拥有者（Resource Owner）对授权的确认信息OAuth2AuthorizationConsent的持久化
      * resource owner已授予client的相关权限信息
      * <p>实体：OAuth2AuthorizationConsent</p>
      * <p>table: oauth2_authorization_consent</p>
