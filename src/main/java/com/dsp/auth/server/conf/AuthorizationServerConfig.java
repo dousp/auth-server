@@ -3,6 +3,7 @@ package com.dsp.auth.server.conf;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.JWSKeySelector;
 import com.nimbusds.jose.proc.JWSVerificationKeySelector;
@@ -14,15 +15,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -36,9 +35,7 @@ import org.springframework.security.oauth2.server.authorization.client.InMemoryR
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.config.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.config.ProviderSettings;
-import org.springframework.security.oauth2.server.authorization.config.TokenSettings;
 import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.security.oauth2.server.authorization.web.OAuth2AuthorizationEndpointFilter;
 import org.springframework.security.oauth2.server.authorization.web.OAuth2AuthorizationServerMetadataEndpointFilter;
@@ -47,7 +44,6 @@ import org.springframework.security.oauth2.server.authorization.web.authenticati
 import org.springframework.security.oauth2.server.authorization.web.authentication.ClientSecretPostAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.JwtClientAssertionAuthenticationConverter;
 import org.springframework.security.oauth2.server.authorization.web.authentication.PublicClientAuthenticationConverter;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -57,7 +53,8 @@ import javax.sql.DataSource;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
-import java.time.Duration;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -69,27 +66,30 @@ import java.util.UUID;
  * @author shupeng.dou
  * @version 2021年12月01日 18:14
  * <p>
- * 程序执行入口
- * <p>
+ * 0. spring-security-oauth2-authorization-server-*.*.*.jar
  * 1. SQL
- * spring-security-oauth2-authorization-server-*.*.*.jar!\org\springframework\security\oauth2\server\authorization\client\oauth2-registered-client-schema.sql<p>
- * spring-security-oauth2-authorization-server-*.*.*.jar!\org\springframework\security\oauth2\server\authorization\oauth2-authorization-consent-schema.sql<p>
- * spring-security-oauth2-authorization-server-*.*.*.jar!\org\springframework\security\oauth2\server\authorization\oauth2-authorization-schema.sql<p>
- *
- * 依稀来自gitee作者xuxiaowei
+ * \org\springframework\security\oauth2\server\authorization\client\oauth2-registered-client-schema.sql<p>
+ * \org\springframework\security\oauth2\server\authorization\oauth2-authorization-consent-schema.sql<p>
+ * \org\springframework\security\oauth2\server\authorization\oauth2-authorization-schema.sql<p>
+ * <p>
+ * 以下来自gitee作者xuxiaowei整理
+ * </p>
  * @see OAuth2AuthorizationServerConfiguration OAuth 2.0 授权服务器支持的 {@link Configuration} 。
  * @see UserDetailsServiceAutoConfiguration
  * @see OAuth2AuthorizationEndpointFilter /oauth2/authorize
  * @see AuthorizationServerSettings#builder() /oauth2/authorize、/oauth2/token、/oauth2/jwks、/oauth2/revoke、/oauth2/introspect、/connect/register、/userinfo
  * @see OAuth2AuthorizationService 此接口的实现负责OAuth 2.0 Authorization(s)的管理。
  * @see InMemoryOAuth2AuthorizationService 一个 {@link OAuth2AuthorizationService} 存储 {@link OAuth2Authorization} 的内存。
- * @see JdbcOAuth2AuthorizationService {@link OAuth2AuthorizationService} 的 JDBC 实现，它使用 {@link org.springframework.jdbc.core.JdbcOperations} 进行 {@link OAuth2Authorization} 持久性。
+ * @see JdbcOAuth2AuthorizationService {@link OAuth2AuthorizationService} 的 JDBC 实现，
+ * 它使用 {@link org.springframework.jdbc.core.JdbcOperations} 进行 {@link OAuth2Authorization} 持久性。
  * @see OAuth2AuthorizationConsentService 此接口的实现负责管理 {@link OAuth2AuthorizationConsent} OAuth 2.0 Authorization Consent(s) 。
  * @see InMemoryOAuth2AuthorizationConsentService 一个 {@link OAuth2AuthorizationConsentService} 存储 {@link OAuth2AuthorizationConsent} 的内存。
- * @see JdbcOAuth2AuthorizationConsentService {@link OAuth2AuthorizationConsentService} 的 JDBC 实现，它使用 {@link org.springframework.jdbc.core.JdbcOperations} 进行 {@link OAuth2AuthorizationConsent} 持久性。
+ * @see JdbcOAuth2AuthorizationConsentService {@link OAuth2AuthorizationConsentService} 的 JDBC 实现，
+ * 它使用 {@link org.springframework.jdbc.core.JdbcOperations} 进行 {@link OAuth2AuthorizationConsent} 持久性。
  * @see RegisteredClientRepository OAuth 2.0 {@link RegisteredClient} (s) 的存储库。
  * @see InMemoryRegisteredClientRepository 在内存中存储 {@link RegisteredClientRepository} (s) 的 {@link RegisteredClient} 。
- * @see JdbcRegisteredClientRepository {@link RegisteredClientRepository} 的 JDBC 实现，它使用 {@link org.springframework.jdbc.core.JdbcOperations} 进行 {@link RegisteredClient} 持久性。
+ * @see JdbcRegisteredClientRepository {@link RegisteredClientRepository} 的 JDBC 实现，
+ * 它使用 {@link org.springframework.jdbc.core.JdbcOperations} 进行 {@link RegisteredClient} 持久性。
  * @see OidcScopes
  * @see OAuth2AuthorizationServerMetadataEndpointFilter
  * @see OAuth2ClientAuthenticationFilter OAuth 2.1 客户凭证验证
@@ -100,13 +100,13 @@ import java.util.UUID;
  * @see OAuth2TokenGenerator OAuth2 令牌生成器
  * @see org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeGenerator OAuth2 授权码生成器
  * @see JwtGenerator 生成用于 {@link Jwt} 或 {@link OAuth2TokenGenerator} 的 {@link OAuth2AccessToken} 的 {@link OidcIdToken}。
- * @see DelegatingOAuth2TokenGenerator 一个 {@link OAuth2TokenGenerator}，它简单地委托给它的 {@link OAuth2TokenGenerator} (s) 的内部 List。每个 {@link OAuth2TokenGenerator} 都有机会使用 {@link OAuth2TokenGenerator#generate(OAuth2TokenContext)} 并返回第一个non-null OAuth2Token 。
+ * @see DelegatingOAuth2TokenGenerator 一个 {@link OAuth2TokenGenerator}，它简单地委托给它的 {@link OAuth2TokenGenerator} (s) 的内部 List。
+ * 每个 {@link OAuth2TokenGenerator} 都有机会使用 {@link OAuth2TokenGenerator#generate(OAuth2TokenContext)} 并返回第一个non-null OAuth2Token 。
  * @see OAuth2AccessTokenGenerator OAuth2 访问令牌生成器
  * @see OAuth2RefreshTokenGenerator 生成 {@link OAuth2TokenGenerator} 的 {@link OAuth2RefreshToken}。
- *
  */
-@Configuration
-@EnableWebSecurity
+@Configuration(proxyBeanMethods = false)
+// @EnableWebSecurity
 public class AuthorizationServerConfig {
 
     @Resource
@@ -121,11 +121,12 @@ public class AuthorizationServerConfig {
      * @see <a href="https://docs.spring.io/spring-authorization-server/docs/current/reference/html/protocol-endpoints.html">...</a>
      */
     @Bean
-    @Order(1)
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
         // 默认的话就用这个
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
         return http
+                .formLogin(Customizer.withDefaults())
                 .exceptionHandling((exceptions) -> exceptions
                         .authenticationEntryPoint(
                                 // 未从授权端点进行身份验证时重定向到登录页面
@@ -138,6 +139,7 @@ public class AuthorizationServerConfig {
      * 配置需要认证的资源，用于身份验证
      * 认证：对使用服务的人的身份核实
      * Spring Security 过滤器链
+     *
      * @see <a href="https://docs.spring.io/spring-security/reference/servlet/authentication/index.html">...</a>
      */
     @Bean
@@ -145,19 +147,12 @@ public class AuthorizationServerConfig {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
                 .authorizeHttpRequests((authorize) -> authorize
-                        .antMatchers("/oauth/**", "/login/**", "/logout/**")
-                        .permitAll()
-                        .antMatchers("/actuator/health","/h2-console/**")
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated()
+                        .anyRequest().authenticated()
                 )
-                // Form login handles the redirect to the login page from the authorization server filter chain
+                // 允许用户使用 HTTP Basic 身份验证进行身份验证
+                // .httpBasic(Customizer.withDefaults())
                 // 允许用户使用基于表单的登录进行身份验证
-                .formLogin(Customizer.withDefaults())
-        // 允许用户使用 HTTP Basic 身份验证进行身份验证
-        // .httpBasic(Customizer.withDefaults())
-        ;
+                .formLogin(Customizer.withDefaults());
         return http.build();
     }
 
@@ -175,7 +170,10 @@ public class AuthorizationServerConfig {
      * 客户端信息持来源
      * 授权服务器要求客户端必须是已经注册的，避免非法的客户端发起授权申请
      * 实体： RegisteredClient
+     *
      * @see RegisteredClientRepository 用于管理客户端的实例。
+     * @see ClientAuthenticationMethod 认证方式
+     * @see AuthorizationGrantType 授权方式
      * table: oauth2_registered_client
      * 操作该表的JDBC服务接口： RegisteredClientRepository
      */
@@ -234,10 +232,24 @@ public class AuthorizationServerConfig {
     }
 
     /**
+     * @see JWKSource 用于签署访问令牌的实例。
+     */
+    // @Bean
+    // public JWKSource<SecurityContext> jwkSource() {
+    //     KeyPair keyPair = generateRsaKey();
+    //     RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
+    //     RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
+    //     RSAKey rsaKey = new RSAKey.Builder(publicKey).privateKey(privateKey).keyID(UUID.randomUUID().toString()).build();
+    //     JWKSet jwkSet = new JWKSet(rsaKey);
+    //     return new ImmutableJWKSet<>(jwkSet);
+    // }
+
+    /**
      * 有需要就的话，就声明一个JwtDecoder进行定制
      *
      * @param jwkSource JSON Web Key (JWK) source
      * @return JwtDecoder
+     * @see OAuth2AuthorizationServerConfiguration#jwtDecoder(JWKSource)
      */
     @Bean
     public static JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {
@@ -285,6 +297,21 @@ public class AuthorizationServerConfig {
     }
 
     /**
+     * 启动时生成的带有密钥的实例 {@link KeyPair} 用于创建 {@link JWKSource} 上述内容。
+     */
+    private static KeyPair generateRsaKey() {
+        KeyPair keyPair;
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(2048);
+            keyPair = keyPairGenerator.generateKeyPair();
+        } catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
+        return keyPair;
+    }
+
+    /**
      * 配置一些端点的路径，比如：获取token、授权端点等
      * 参看{@link org.springframework.security.oauth2.server.authorization.config.ProviderSettings#builder}
      */
@@ -298,17 +325,6 @@ public class AuthorizationServerConfig {
                 .build();
     }
 
-    private static KeyPair generateRsaKey() {
-        KeyPair keyPair;
-        try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            keyPair = keyPairGenerator.generateKeyPair();
-        } catch (Exception ex) {
-            throw new IllegalStateException(ex);
-        }
-        return keyPair;
-    }
 
     /**
      * 这个0.4版本才有。。。。

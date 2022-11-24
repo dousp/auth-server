@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'mysql:mysql-connector-java:8.0.30'
+    // spring
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -31,9 +31,12 @@ dependencies {
     // implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.security:spring-security-cas'
     implementation 'org.springframework.security:spring-security-oauth2-authorization-server:0.3.1'
-
+    // other
+    implementation group: 'p6spy', name: 'p6spy', version: '3.9.1'
+    implementation 'mysql:mysql-connector-java:8.0.30'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    // test
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
