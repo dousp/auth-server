@@ -6,55 +6,19 @@
 -- ----------------------------
 -- Records of oauth2_registered_client
 -- ----------------------------
-INSERT INTO `oauth2_registered_client`(`id`,
-                                       `client_id`,
-                                       `client_id_issued_at`,
-                                       `client_secret`,
-                                       `client_secret_expires_at`,
-                                       `client_name`,
-                                       `client_authentication_methods`,
-                                       `authorization_grant_types`,
-                                       `redirect_uris`,
-                                       `scopes`,
-                                       `client_settings`,
-                                       `token_settings`)
-VALUES ('36bf1689-3d71-4fb1-a88a-5ebf5cc5c5d7',
-        'dd_client_id',
-        '2022-05-30 08:56:58',
-        '{noop}dd',
-        NULL,
-        '36bf1689-3d71-4fb1-a88a-5ebf5cc5c5d7',
-        'client_secret_post,client_secret_basic',
-        'refresh_token,implicit,client_credentials,authorization_code',
-        'http://127.0.0.1:1401/code,http://baidu.com',
-        'user',
-        '{\"@class\":\"java.util.Collections$UnmodifiableMap\",\"settings.client.require-proof-key\":false,\"settings.client.require-authorization-consent\":true}',
-        '{\"@class\":\"java.util.Collections$UnmodifiableMap\",\"settings.token.reuse-refresh-tokens\":true,\"settings.token.id-token-signature-algorithm\":[\"org.springframework.security.oauth2.jose.jws.SignatureAlgorithm\",\"RS256\"],\"settings.token.access-token-time-to-live\":[\"java.time.Duration\",300.000000000],\"settings.token.access-token-format\":{\"@class\":\"org.springframework.security.oauth2.core.OAuth2TokenFormat\",\"value\":\"self-contained\"},\"settings.token.refresh-token-time-to-live\":[\"java.time.Duration\",3600.000000000]}');
 
-INSERT INTO `oauth2_registered_client`(`id`,
-                                       `client_id`,
-                                       `client_id_issued_at`,
-                                       `client_secret`,
-                                       `client_secret_expires_at`,
-                                       `client_name`,
-                                       `client_authentication_methods`,
-                                       `authorization_grant_types`,
-                                       `redirect_uris`,
-                                       `scopes`,
-                                       `client_settings`,
-                                       `token_settings`)
-VALUES ('570d9f37-8a95-4a74-a1f0-fb913b78aeca',
-        'dd2-client',
-        '2022-05-30 08:56:58',
-        '{noop}dd',
-        NULL,
-        '570d9f37-8a95-4a74-a1f0-fb913b78aeca',
-        'client_secret_post,client_secret_basic',
-        'refresh_token,client_credentials,authorization_code',
-        'http://127.0.0.1:1401/login/oauth2/code/messaging-client-oidc,http://127.0.0.1:1401/authorized,http://baidu.com',
-        'openid,user,message.read,message.write',
+INSERT INTO `auth`.`oauth2_registered_client` (`id`, `client_id`, `client_id_issued_at`, `client_secret`,
+                                               `client_secret_expires_at`, `client_name`,
+                                               `client_authentication_methods`, `authorization_grant_types`,
+                                               `redirect_uris`, `scopes`, `client_settings`, `token_settings`)
+VALUES ('e255ba29-fe42-4236-93ce-f09d85e62f0a', 'ddd', '2022-12-03 11:38:32', '{noop}ddd', NULL, '豆豆',
+        'client_secret_post,private_key_jwt,client_secret_jwt,client_secret_basic',
+        'refresh_token,client_credentials,authorization_code,urn:ietf:params:oauth:grant-type:jwt-bearer',
+        'http://127.0.0.1:8080/authorized,https://baidu.com,http://127.0.0.1:8080/login/oauth2/code/messaging-client-oidc',
+        'openid,USER,msg.read,msg.write',
         '{\"@class\":\"java.util.Collections$UnmodifiableMap\",\"settings.client.require-proof-key\":false,\"settings.client.require-authorization-consent\":true}',
-        '{\"@class\":\"java.util.Collections$UnmodifiableMap\",\"settings.token.reuse-refresh-tokens\":true,\"settings.token.id-token-signature-algorithm\":[\"org.springframework.security.oauth2.jose.jws.SignatureAlgorithm\",\"RS256\"],\"settings.token.access-token-time-to-live\":[\"java.time.Duration\",300.000000000],\"settings.token.access-token-format\":{\"@class\":\"org.springframework.security.oauth2.core.OAuth2TokenFormat\",\"value\":\"self-contained\"},\"settings.token.refresh-token-time-to-live\":[\"java.time.Duration\",3600.000000000]}');
+        '{\"@class\":\"java.util.Collections$UnmodifiableMap\",\"settings.token.reuse-refresh-tokens\":true,\"settings.token.id-token-signature-algorithm\":[\"org.springframework.security.oauth2.jose.jws.SignatureAlgorithm\",\"RS256\"],\"settings.token.access-token-time-to-live\":[\"java.time.Duration\",3600.000000000],\"settings.token.access-token-format\":{\"@class\":\"org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat\",\"value\":\"self-contained\"},\"settings.token.refresh-token-time-to-live\":[\"java.time.Duration\",10800.000000000],\"settings.token.authorization-code-time-to-live\":[\"java.time.Duration\",300.000000000]}');
+
 
 
 -- ----------------------------

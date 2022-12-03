@@ -21,6 +21,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -28,6 +29,7 @@ import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.authorization.*;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
@@ -35,6 +37,7 @@ import org.springframework.security.oauth2.server.authorization.client.JdbcRegis
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.security.oauth2.server.authorization.web.OAuth2AuthorizationEndpointFilter;
@@ -47,12 +50,12 @@ import org.springframework.security.oauth2.server.authorization.web.authenticati
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import javax.sql.DataSource;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 
@@ -105,6 +108,8 @@ import java.util.Set;
 // @EnableWebSecurity
 public class AuthorizationServerConfig {
 
+    private static final String CUSTOM_CONSENT_PAGE_URI = "/oauth2/consent";
+
     @Resource
     private SecurityProperties properties;
 
@@ -119,16 +124,36 @@ public class AuthorizationServerConfig {
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
+
         // 默认的话就用这个
-        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
-        return http
-                .formLogin(Customizer.withDefaults())
-                .exceptionHandling((exceptions) -> exceptions
-                        .authenticationEntryPoint(
-                                // 未从授权端点进行身份验证时重定向到登录页面
-                                new LoginUrlAuthenticationEntryPoint("/login"))
+        // OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
+
+        // 有自定义了这么动
+        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
+                new OAuth2AuthorizationServerConfigurer();
+        authorizationServerConfigurer
+                .authorizationEndpoint(authorizationEndpoint ->
+                        authorizationEndpoint.consentPage(CUSTOM_CONSENT_PAGE_URI))
+                // Enable OpenID Connect 1.0
+                .oidc(Customizer.withDefaults());
+
+        RequestMatcher endpointsMatcher = authorizationServerConfigurer
+                .getEndpointsMatcher();
+
+        http
+                .securityMatcher(endpointsMatcher)
+                .authorizeHttpRequests(authorize ->
+                        authorize.anyRequest().authenticated()
                 )
-                .build();
+                .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
+                // .csrf().disable()
+                .formLogin(Customizer.withDefaults())
+                .exceptionHandling(exceptions ->
+                        exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
+                )
+                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
+                .apply(authorizationServerConfigurer);
+        return http.build();
     }
 
     /**
@@ -202,13 +227,24 @@ public class AuthorizationServerConfig {
     }
 
     /**
-     * 对JWT进行签名的加解密密钥
+     * 对JWT进行签名的加解密密钥:jks
+     * :jks
+     * :RSAKey
      *
      * @return The matching JWKs, empty list if no matches were found.
+     * @see JWKSource 用于签署访问令牌的实例。
      */
     @Bean
     @SneakyThrows
     public JWKSource<SecurityContext> jwkSource() {
+        // RSAKey 用这种方式
+        // KeyPair keyPair = generateRsaKey();
+        // RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
+        // RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
+        // RSAKey rsaKey = new RSAKey.Builder(publicKey).privateKey(privateKey).keyID(UUID.randomUUID().toString()).build();
+        // JWKSet jwkSet = new JWKSet(rsaKey);
+        // return new ImmutableJWKSet<>(jwkSet);
+
         // 秘钥信息
         String path = properties.getKeyPath();
         String alias = properties.getKeyAlias();
@@ -226,19 +262,6 @@ public class AuthorizationServerConfig {
         // JWKSet jwkSet = new JWKSet(rsaKey);
         // return (jwkSelector, securityContext) -> jwkSelector.select(jwkSet);
     }
-
-    /**
-     * @see JWKSource 用于签署访问令牌的实例。
-     */
-    // @Bean
-    // public JWKSource<SecurityContext> jwkSource() {
-    //     KeyPair keyPair = generateRsaKey();
-    //     RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
-    //     RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-    //     RSAKey rsaKey = new RSAKey.Builder(publicKey).privateKey(privateKey).keyID(UUID.randomUUID().toString()).build();
-    //     JWKSet jwkSet = new JWKSet(rsaKey);
-    //     return new ImmutableJWKSet<>(jwkSet);
-    // }
 
     /**
      * 有需要就的话，就声明一个JwtDecoder进行定制
@@ -272,8 +295,29 @@ public class AuthorizationServerConfig {
             // todo Override the default Nimbus claims set verifier as NimbusJwtDecoder handles it instead
         });
         return new NimbusJwtDecoder(jwtProcessor);
+        // 要是用下面这种，代码改怎么弄？
         // return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
     }
+
+    // @Bean
+    // public OAuth2TokenGenerator<?> tokenGenerator() {
+    //     JwtEncoder jwtEncoder = ...
+    //     JwtGenerator jwtGenerator = new JwtGenerator(jwtEncoder);
+    //     OAuth2AccessTokenGenerator accessTokenGenerator = new OAuth2AccessTokenGenerator();
+    //     accessTokenGenerator.setAccessTokenCustomizer(accessTokenCustomizer());
+    //     OAuth2RefreshTokenGenerator refreshTokenGenerator = new OAuth2RefreshTokenGenerator();
+    //     return new DelegatingOAuth2TokenGenerator(
+    //             jwtGenerator, accessTokenGenerator, refreshTokenGenerator);
+    // }
+
+    // @Bean
+    // public OAuth2TokenCustomizer<OAuth2TokenClaimsContext> accessTokenCustomizer() {
+    //     return context -> {
+    //         OAuth2TokenClaimsSet.Builder claims = context.getClaims();
+    //         // Customize claims
+    //
+    //     };
+    // }
 
     /**
      * 如果有需要的话，定制jwt，进行增强，
@@ -284,27 +328,20 @@ public class AuthorizationServerConfig {
     OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
         return jwtEncodingContext -> {
             JwsHeader.Builder jwsHeader = jwtEncodingContext.getJwsHeader();
-            jwsHeader.header("client-id", jwtEncodingContext.getRegisteredClient().getClientId())
-                    .header("dd", "dd");
             JwtClaimsSet.Builder claims = jwtEncodingContext.getClaims();
+
+            jwsHeader.header("client-id", jwtEncodingContext.getRegisteredClient().getClientId()).header("dd", "dd");
             claims.claim("dd", "dd");
+
+            if (jwtEncodingContext.getTokenType().equals(OAuth2TokenType.ACCESS_TOKEN)) {
+                // Customize headers/claims for access_token
+
+            } else if (Objects.equals(jwtEncodingContext.getTokenType().getValue(), OidcParameterNames.ID_TOKEN)) {
+                // Customize headers/claims for id_token
+
+            }
             JwtEncodingContext.with(jwtEncodingContext.getJwsHeader(), claims);
         };
-    }
-
-    /**
-     * 启动时生成的带有密钥的实例 {@link KeyPair} 用于创建 {@link JWKSource} 上述内容。
-     */
-    private static KeyPair generateRsaKey() {
-        KeyPair keyPair;
-        try {
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048);
-            keyPair = keyPairGenerator.generateKeyPair();
-        } catch (Exception ex) {
-            throw new IllegalStateException(ex);
-        }
-        return keyPair;
     }
 
 

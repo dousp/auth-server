@@ -1,5 +1,10 @@
 # 授权服务器
 
+## Upgrade to 1.0.0
+
+### 遇到的问题
+- https://github.com/spring-projects/spring-authorization-server/issues/892
+
 ## 授权码模式
 
 - 注意
