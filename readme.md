@@ -2,9 +2,9 @@
 
 ## 授权码模式
 
-### 注意
-- authorities表中要有对应User的授权信息
-- oauth2_registered_client表中要有对应Client的授权账户信息
+- 注意
+  - authorities表中要有对应User的授权信息
+  - oauth2_registered_client表中要有对应Client的授权账户信息
 
 ### 请求授权码
 - state随机生成

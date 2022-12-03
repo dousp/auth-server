@@ -3,13 +3,13 @@ package com.dsp.auth.server.conf;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.JWSKeySelector;
 import com.nimbusds.jose.proc.JWSVerificationKeySelector;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.proc.ConfigurableJWTProcessor;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
+import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
@@ -21,7 +21,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -35,7 +34,8 @@ import org.springframework.security.oauth2.server.authorization.client.InMemoryR
 import org.springframework.security.oauth2.server.authorization.client.JdbcRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.config.ProviderSettings;
+import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.token.*;
 import org.springframework.security.oauth2.server.authorization.web.OAuth2AuthorizationEndpointFilter;
 import org.springframework.security.oauth2.server.authorization.web.OAuth2AuthorizationServerMetadataEndpointFilter;
@@ -48,16 +48,12 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 
 /**
@@ -98,7 +94,7 @@ import java.util.UUID;
  * @see ClientSecretPostAuthenticationConverter 基于 POST 参数的 客户端凭据 验证
  * @see PublicClientAuthenticationConverter 基于 Proof Key for Code Exchange (PKCE) 对公共客户端进行身份验证
  * @see OAuth2TokenGenerator OAuth2 令牌生成器
- * @see org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeGenerator OAuth2 授权码生成器
+ * @see org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeGenerator --> not public;  OAuth2 授权码生成器
  * @see JwtGenerator 生成用于 {@link Jwt} 或 {@link OAuth2TokenGenerator} 的 {@link OAuth2AccessToken} 的 {@link OidcIdToken}。
  * @see DelegatingOAuth2TokenGenerator 一个 {@link OAuth2TokenGenerator}，它简单地委托给它的 {@link OAuth2TokenGenerator} (s) 的内部 List。
  * 每个 {@link OAuth2TokenGenerator} 都有机会使用 {@link OAuth2TokenGenerator#generate(OAuth2TokenContext)} 并返回第一个non-null OAuth2Token 。
@@ -287,12 +283,12 @@ public class AuthorizationServerConfig {
     @Bean
     OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer() {
         return jwtEncodingContext -> {
-            JwsHeader.Builder jwsHeader = jwtEncodingContext.getHeaders();
+            JwsHeader.Builder jwsHeader = jwtEncodingContext.getJwsHeader();
             jwsHeader.header("client-id", jwtEncodingContext.getRegisteredClient().getClientId())
                     .header("dd", "dd");
             JwtClaimsSet.Builder claims = jwtEncodingContext.getClaims();
             claims.claim("dd", "dd");
-            JwtEncodingContext.with(jwtEncodingContext.getHeaders(), claims);
+            JwtEncodingContext.with(jwtEncodingContext.getJwsHeader(), claims);
         };
     }
 
@@ -311,29 +307,19 @@ public class AuthorizationServerConfig {
         return keyPair;
     }
 
+
     /**
      * 配置一些端点的路径，比如：获取token、授权端点等
-     * 参看{@link org.springframework.security.oauth2.server.authorization.config.ProviderSettings#builder}
+     * 这个0.4版本才有。。。。
      */
     @Bean
-    public ProviderSettings providerSettings(@Value("${server.port}") Integer port) {
-        return ProviderSettings.builder()
+    public AuthorizationServerSettings authorizationServerSettings(@Value("${server.port}") Integer port) {
+        return AuthorizationServerSettings.builder()
                 // 配置获取token的端点路径
                 // .tokenEndpoint("/oauth2/token")
                 // 发布者的url地址,一般是本系统访问的根路径
                 .issuer("http://auth-server.com:" + port)
                 .build();
     }
-
-
-    /**
-     * 这个0.4版本才有。。。。
-     *
-     * @return
-     */
-    // @Bean
-    // public AuthorizationServerSettings authorizationServerSettings() {
-    //     return AuthorizationServerSettings.builder().build();
-    // }
 
 }
