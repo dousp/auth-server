@@ -1,12 +1,5 @@
 package com.dsp.auth.server.web;
 
-import java.security.Principal;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsent;
@@ -18,7 +11,9 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
+
+import java.security.Principal;
+import java.util.*;
 
 /**
  * @author Daniel Garnier-Moiroux
@@ -75,17 +70,6 @@ public class AuthorizationConsentController {
         model.addAttribute("previouslyApprovedScopes", withDescription(previouslyApprovedScopes));
         model.addAttribute("principalName", principal.getName());
         return "consent";
-
-
-
-        // ModelAndView modelAndView = new ModelAndView();
-        // modelAndView.setViewName("consent1");
-        // modelAndView.addObject("clientId", clientId);
-        // modelAndView.addObject("state", state);
-        // modelAndView.addObject("scopes", withDescription(scopesToApprove));
-        // modelAndView.addObject("previouslyApprovedScopes", withDescription(previouslyApprovedScopes));
-        // modelAndView.addObject("principalName", principal.getName());
-        // return modelAndView;
     }
 
     private static Set<ScopeWithDescription> withDescription(Set<String> scopes) {

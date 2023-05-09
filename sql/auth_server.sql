@@ -71,27 +71,30 @@ CREATE TABLE oauth2_authorization (
     PRIMARY KEY (id)
 );
 
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE `users`
+(
+    `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci  NOT NULL,
+    `password` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+    `enabled`  tinyint(1)                                                    NOT NULL,
+    PRIMARY KEY (`username`) USING BTREE
+) ENGINE = InnoDB
+  CHARACTER SET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = DYNAMIC;
+
 
 DROP TABLE IF EXISTS `authorities`;
 CREATE TABLE `authorities`
 (
     `username`  varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
     `authority` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-    UNIQUE INDEX `ix_auth_username`(`username`, `authority`) USING BTREE,
+    UNIQUE INDEX `ix_auth_username` (`username`, `authority`) USING BTREE,
     CONSTRAINT `fk_authorities_users` FOREIGN KEY (`username`) REFERENCES `users` (`username`) ON DELETE RESTRICT ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
-
-
-DROP TABLE IF EXISTS `users`;
-CREATE TABLE `users`
-(
-    `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci  NOT NULL,
-    `password` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-    `enabled`  tinyint(1) NOT NULL,
-    PRIMARY KEY (`username`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
-
-
+) ENGINE = InnoDB
+  CHARACTER SET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = DYNAMIC;
 
 SET
-FOREIGN_KEY_CHECKS = 1;
+    FOREIGN_KEY_CHECKS = 1;

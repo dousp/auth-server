@@ -38,10 +38,6 @@ public class InfoController {
                 // https://docs.spring.io/spring-security/reference/features/authentication/password-storage.html
                 .clientSecret("{noop}ddd")
                 // 授权方式
-                // .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                // .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_JWT)
-                // .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
-                // .clientAuthenticationMethod(ClientAuthenticationMethod.PRIVATE_KEY_JWT)
                 .clientAuthenticationMethods(clientAuthenticationMethods -> {
                     clientAuthenticationMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC);
                     clientAuthenticationMethods.add(ClientAuthenticationMethod.CLIENT_SECRET_JWT);
@@ -49,16 +45,12 @@ public class InfoController {
                     clientAuthenticationMethods.add(ClientAuthenticationMethod.PRIVATE_KEY_JWT);
                 })
                 // 授权类型
-                // .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                // .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                // .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                // .authorizationGrantType(AuthorizationGrantType.JWT_BEARER)
                 .authorizationGrantTypes(authorizationGrantTypes -> {
                     authorizationGrantTypes.add(AuthorizationGrantType.AUTHORIZATION_CODE);
                     authorizationGrantTypes.add(AuthorizationGrantType.REFRESH_TOKEN);
                     authorizationGrantTypes.add(AuthorizationGrantType.CLIENT_CREDENTIALS);
                     authorizationGrantTypes.add(AuthorizationGrantType.JWT_BEARER);
-                    // 这中方式过时了
+                    // 这种方式过时了
                     // authorizationGrantTypes.add(AuthorizationGrantType.PASSWORD);
                 })
                 // 回调地址名单，不在此列将被拒绝 而且只能使用IP或者域名  不能使用 localhost
@@ -68,10 +60,10 @@ public class InfoController {
                 // 客户端申请的作用域，也可以理解这个客户端申请访问用户的哪些信息
                 .scope(OidcScopes.OPENID)
                 .scope(OidcScopes.PROFILE)
-                .scope("USER")
+                .scope("user")
                 .scope("msg.write")
                 .scope("msg.read")
-                // 配置token
+                // 配置5token
                 // 是否需要用户确认一下客户端需要获取用户的哪些权限
                 // 比如：客户端需要获取用户的 用户信息、用户照片 但是此处用户可以控制只给客户端授权获取 用户信息。
                 .tokenSettings(TokenSettings.builder()

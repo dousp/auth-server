@@ -7,7 +7,7 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
     <contextName>auth logback</contextName>
     <!--自定义属性-->
-    <property name="log_dir" value="/logs" />
+    <property name="log_dir" value="build/logs"/>
     <property name="max_history" value="30" />
     <!--日志入库的配置，这里通过springProperty标签直接读取application.yml中数据库的配置-->
     <springProperty scope="context" name="app_name" source="spring.application.name" defaultValue="auth-default"/>
@@ -63,6 +63,7 @@
     <logger name="org.springframework.security.jackson2" level="info"/>
     <logger name="org.springframework.boot.autoconfigure.logging" level="error"/>
     <logger name="com.zaxxer.hikari" level="info" />
+    <logger name="org.thymeleaf.TemplateEngine" level="info"/>
 
 
     <!-- root级别 DEBUG -->
