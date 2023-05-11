@@ -37,7 +37,7 @@ public class AuthorizationConsentController {
     @GetMapping(value = "/index")
     public String index(){
         logger.info("come to [/oauth2/consent] path");
-        return "index.html";
+        return "index";
     }
 
 

@@ -4,7 +4,7 @@ public interface AuthConstants {
 
     String[] DEFAULT_IGNORED_STATIC_RESOURCES = {"/plugins/**", "/stomp/ws", "/info/**"};
     String[] DEFAULT_WEB_STATIC_RESOURCES = {"/error/**", "/static/**", "/assets/**", "/webjars/**", "/favicon.ico"};
-    String[] DEFAULT_LOGIN_RESOURCES = {"/authorization/**", "/oauth2/sign-out", "/login*"};
+    String[] DEFAULT_LOGIN_RESOURCES = {"/authorization/**", "/oauth2/sign-out", "/login"};
     String[] DEFAULT_DOC_STATIC_RESOURCES = {"/swagger-ui.html", "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs", "/v3/api-docs/**", "/openapi.json"};
 
     String AUTHORIZATION_CODE = "authorization_code";

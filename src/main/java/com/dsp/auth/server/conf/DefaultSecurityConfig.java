@@ -3,6 +3,7 @@ package com.dsp.auth.server.conf;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,18 +28,25 @@ public class DefaultSecurityConfig {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable().cors();
         http.authorizeHttpRequests((authorize) -> authorize
-                .requestMatchers(AuthConstants.DEFAULT_IGNORED_STATIC_RESOURCES).permitAll()
-                .requestMatchers(AuthConstants.DEFAULT_WEB_STATIC_RESOURCES).permitAll()
-                .requestMatchers(AuthConstants.DEFAULT_LOGIN_RESOURCES).permitAll()
-                .requestMatchers(AuthConstants.DEFAULT_DOC_STATIC_RESOURCES).permitAll()
-                .anyRequest().authenticated()
+                        .requestMatchers(AuthConstants.DEFAULT_IGNORED_STATIC_RESOURCES).permitAll()
+                        .requestMatchers(AuthConstants.DEFAULT_WEB_STATIC_RESOURCES).permitAll()
+                        .requestMatchers(AuthConstants.DEFAULT_LOGIN_RESOURCES).permitAll()
+                        .requestMatchers(AuthConstants.DEFAULT_DOC_STATIC_RESOURCES).permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS).permitAll()
+                // .anyRequest().authenticated()
         );
+
+        http.securityMatcher("/index")
+                .authorizeHttpRequests()
+                .anyRequest().authenticated();
+
         // 允许用户使用 HTTP Basic 身份验证进行身份验证
         // .httpBasic(Customizer.withDefaults())
         // 允许用户使用基于表单的登录进行身份验证
         http.formLogin(formLogin ->
                 formLogin.loginPage("/login")
         );
+        http.oauth2ResourceServer().jwt();
         return http.build();
     }
 

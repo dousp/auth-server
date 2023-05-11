@@ -24,3 +24,9 @@ spring:
       max-lifetime: 600000
       #连接到数据库时等待最长时间(秒)
       login-timeout: 5
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080
