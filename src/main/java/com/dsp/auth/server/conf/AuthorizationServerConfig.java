@@ -135,8 +135,10 @@ public class AuthorizationServerConfig {
                 .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
                 // .csrf().disable()
                 .formLogin(Customizer.withDefaults())
-                .exceptionHandling(exceptions ->
-                        exceptions.authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(properties.getLoginPage()))
+                .exceptionHandling(exceptions -> exceptions
+                                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(properties.getLoginPage()))
+                        // .accessDeniedHandler(null)
+                        // .accessDeniedPage("")
                 )
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
                 .apply(authorizationServerConfigurer);

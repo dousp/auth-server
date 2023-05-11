@@ -1,5 +1,7 @@
-package com.dsp.auth.server.web;
+package com.dsp.auth.server.rest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsent;
@@ -20,6 +22,9 @@ import java.util.*;
  */
 @Controller
 public class AuthorizationConsentController {
+
+    private final Logger logger = LoggerFactory.getLogger(AuthorizationConsentController.class);
+
     private final RegisteredClientRepository registeredClientRepository;
     private final OAuth2AuthorizationConsentService authorizationConsentService;
 
@@ -31,6 +36,7 @@ public class AuthorizationConsentController {
 
     @GetMapping(value = "/index")
     public String index(){
+        logger.info("come to [/oauth2/consent] path");
         return "index.html";
     }
 
@@ -40,6 +46,8 @@ public class AuthorizationConsentController {
                                 @RequestParam(OAuth2ParameterNames.CLIENT_ID) String clientId,
                                 @RequestParam(OAuth2ParameterNames.SCOPE) String scope,
                                 @RequestParam(OAuth2ParameterNames.STATE) String state) {
+
+        logger.info("come to [/oauth2/consent] path");
 
         // Remove scopes that were already approved
         Set<String> scopesToApprove = new HashSet<>();

@@ -3,7 +3,6 @@ package com.dsp.auth.server.conf;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -37,7 +36,9 @@ public class DefaultSecurityConfig {
         // 允许用户使用 HTTP Basic 身份验证进行身份验证
         // .httpBasic(Customizer.withDefaults())
         // 允许用户使用基于表单的登录进行身份验证
-        http.formLogin(Customizer.withDefaults());
+        http.formLogin(formLogin ->
+                formLogin.loginPage("/login")
+        );
         return http.build();
     }
 
