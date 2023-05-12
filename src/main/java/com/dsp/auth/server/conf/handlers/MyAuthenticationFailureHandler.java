@@ -1,5 +1,6 @@
-package com.dsp.auth.server.conf;
+package com.dsp.auth.server.conf.handlers;
 
+import com.alibaba.fastjson2.JSON;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,11 +24,11 @@ public class MyAuthenticationFailureHandler implements AuthenticationFailureHand
         renderJson(response, "MyAuthenticationFailureHandler", MediaType.APPLICATION_JSON.toString());
     }
 
-    public static void renderJson(HttpServletResponse response, String string, String type) {
+    public static void renderJson(HttpServletResponse response, Object obj, String type) {
         try {
             response.setContentType(type);
             response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
-            response.getWriter().print(string);
+            response.getWriter().print(JSON.toJSONString(obj));
             response.getWriter().flush();
             response.getWriter().close();
         } catch (IOException e) {

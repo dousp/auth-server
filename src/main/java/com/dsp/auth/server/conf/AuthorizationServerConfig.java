@@ -116,14 +116,15 @@ public class AuthorizationServerConfig {
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
 
-        // 默认的话就用这个
+        // 先用默认的配置一遍，有需要再覆盖
         // OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
 
         // 有自定义了这么动
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
         authorizationServerConfigurer
                 .authorizationEndpoint(authorizationEndpoint ->
-                        authorizationEndpoint.consentPage(AuthConstants.OAUTH_CONSENT_PAGE))
+                        authorizationEndpoint.consentPage(AuthConstants.OAUTH_CONSENT_PAGE)
+                )
                 // Enable OpenID Connect 1.0
                 .oidc(Customizer.withDefaults());
 
@@ -134,11 +135,11 @@ public class AuthorizationServerConfig {
                 )
                 .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
                 // .csrf().disable()
-                .formLogin(Customizer.withDefaults())
+                .cors()
+                .and()
                 .exceptionHandling(exceptions -> exceptions
-                                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(properties.getLoginPage()))
-                        // .accessDeniedHandler(null)
-                        // .accessDeniedPage("")
+                        // 未从授权端点进行身份验证时重定向到登录页面
+                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(properties.getLoginPage()))
                 )
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
                 .apply(authorizationServerConfigurer);

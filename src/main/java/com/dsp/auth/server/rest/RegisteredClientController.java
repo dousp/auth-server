@@ -16,19 +16,19 @@ import java.time.Duration;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/info")
-public class InfoController {
+@RequestMapping("/client")
+public class RegisteredClientController {
 
     @Resource
     private RegisteredClientRepository registeredClientRepository;
 
     @GetMapping("")
-    public String info(){
+    public String clientInfo() {
 
         return "success";
     }
 
-    @GetMapping("/create/client")
+    @GetMapping("/create")
     public String createClient(){
         RegisteredClient client = RegisteredClient
                 .withId(UUID.randomUUID().toString())

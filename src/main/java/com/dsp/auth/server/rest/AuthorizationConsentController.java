@@ -34,12 +34,6 @@ public class AuthorizationConsentController {
         this.authorizationConsentService = authorizationConsentService;
     }
 
-    @GetMapping(value = "/index")
-    public String index(){
-        logger.info("come to [/oauth2/consent] path");
-        return "index";
-    }
-
 
     @GetMapping(value = "/oauth2/consent")
     public String consent(Principal principal, Model model,

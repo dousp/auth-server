@@ -1,5 +1,7 @@
 package com.dsp.auth.server.conf;
 
+import com.dsp.auth.server.conf.handlers.SimpleAccessDeniedHandler;
+import com.dsp.auth.server.conf.handlers.SimpleAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -27,26 +29,28 @@ public class DefaultSecurityConfig {
     @Order(2)
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable().cors();
-        http.authorizeHttpRequests((authorize) -> authorize
+        http
+                // .securityMatcher("/index/**")
+                // .securityMatcher("/messages/**")
+                .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(AuthConstants.DEFAULT_IGNORED_STATIC_RESOURCES).permitAll()
                         .requestMatchers(AuthConstants.DEFAULT_WEB_STATIC_RESOURCES).permitAll()
                         .requestMatchers(AuthConstants.DEFAULT_LOGIN_RESOURCES).permitAll()
                         .requestMatchers(AuthConstants.DEFAULT_DOC_STATIC_RESOURCES).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                // .anyRequest().authenticated()
-        );
+                        // .requestMatchers("/index*").hasAuthority("SCOPE_msg.read")
+                        // .requestMatchers("/messages/**").hasAuthority("SCOPE_msg.read")
+                        .anyRequest().authenticated()
+                );
 
-        http.securityMatcher("/index")
-                .authorizeHttpRequests()
-                .anyRequest().authenticated();
-
-        // 允许用户使用 HTTP Basic 身份验证进行身份验证
-        // .httpBasic(Customizer.withDefaults())
         // 允许用户使用基于表单的登录进行身份验证
-        http.formLogin(formLogin ->
-                formLogin.loginPage("/login")
+        http.formLogin().loginPage("/login");
+        http.oauth2ResourceServer(oauth2ResourceServer ->
+                oauth2ResourceServer.jwt()
+                        .and()
+                        .accessDeniedHandler(new SimpleAccessDeniedHandler())
+                        .authenticationEntryPoint(new SimpleAuthenticationEntryPoint())
         );
-        http.oauth2ResourceServer().jwt();
         return http.build();
     }
 

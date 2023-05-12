@@ -62,13 +62,17 @@
     <!--<logger name="org.springframework.security.oauth2.server.authorization" level="debug"/>-->
     <logger name="org.springframework.security.jackson2" level="info"/>
     <logger name="org.springframework.boot.autoconfigure.logging" level="error"/>
-    <logger name="com.zaxxer.hikari" level="info" />
+    <logger name="com.zaxxer.hikari" level="info"/>
     <logger name="org.thymeleaf.TemplateEngine" level="info"/>
+    <logger name="org.apache.tomcat" level="info"/>
+    <logger name="javax.management" level="info"/>
+    <logger name="sun.rmi" level="info"/>
+    <logger name="java.io" level="info"/>
 
 
     <!-- root级别 DEBUG -->
     <root level="DEBUG">
-        <appender-ref ref="STDOUT" />
-        <appender-ref ref="FILE" />
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
     </root>
 </configuration>
