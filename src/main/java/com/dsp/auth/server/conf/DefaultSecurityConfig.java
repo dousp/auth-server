@@ -51,6 +51,7 @@ public class DefaultSecurityConfig {
 
         // 允许用户使用基于表单的登录进行身份验证
         http.formLogin()
+                // .failureUrl()
                 .loginPage(properties.getLoginUrl())
                 .failureHandler(new MyAuthenticationFailureHandler())
                 .successHandler(new MyAuthenticationSuccessHandler());

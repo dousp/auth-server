@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class OAuth2Properties {
 
     private String loginUrl = "/login";
-    private String logoutUrl = "/login?logout";
+    private String logoutUrl = "/logout";
     private String keyPath;
     private String keyAlias;
     private String keyPass;
