@@ -1,7 +1,7 @@
 package com.dsp.auth.server.conf;
 
-import com.dsp.auth.server.conf.handlers.SimpleAccessDeniedHandler;
-import com.dsp.auth.server.conf.handlers.SimpleAuthenticationEntryPoint;
+import com.dsp.auth.server.conf.handlers.*;
+import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -17,6 +17,9 @@ import javax.sql.DataSource;
 @EnableWebSecurity
 @Configuration(proxyBeanMethods = false)
 public class DefaultSecurityConfig {
+
+    @Resource
+    private OAuth2Properties properties;
 
     /**
      * 配置需要认证的资源，用于身份验证
@@ -35,7 +38,10 @@ public class DefaultSecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(AuthConstants.DEFAULT_IGNORED_STATIC_RESOURCES).permitAll()
                         .requestMatchers(AuthConstants.DEFAULT_WEB_STATIC_RESOURCES).permitAll()
-                        .requestMatchers(AuthConstants.DEFAULT_LOGIN_RESOURCES).permitAll()
+                        // 登录和登出需要提前排除
+                        .requestMatchers(properties.getLogoutUrl(), properties.getLoginUrl()).permitAll()
+                        // 不需要登录的url
+                        .requestMatchers(AuthConstants.DEFAULT_NO_NEED_LOGIN_RESOURCES).permitAll()
                         .requestMatchers(AuthConstants.DEFAULT_DOC_STATIC_RESOURCES).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS).permitAll()
                         // .requestMatchers("/index*").hasAuthority("SCOPE_msg.read")
@@ -44,7 +50,15 @@ public class DefaultSecurityConfig {
                 );
 
         // 允许用户使用基于表单的登录进行身份验证
-        http.formLogin().loginPage("/login");
+        http.formLogin()
+                .loginPage(properties.getLoginUrl())
+                .failureHandler(new MyAuthenticationFailureHandler())
+                .successHandler(new MyAuthenticationSuccessHandler());
+        http.logout()
+                .logoutUrl(properties.getLogoutUrl())
+                .logoutSuccessHandler(new MyLogoutSuccessHandler());
+
+        // resource server
         http.oauth2ResourceServer(oauth2ResourceServer ->
                 oauth2ResourceServer.jwt()
                         .and()

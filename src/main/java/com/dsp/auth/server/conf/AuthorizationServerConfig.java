@@ -139,7 +139,7 @@ public class AuthorizationServerConfig {
                 .and()
                 .exceptionHandling(exceptions -> exceptions
                         // 未从授权端点进行身份验证时重定向到登录页面
-                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(properties.getLoginPage()))
+                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(properties.getLoginUrl()))
                 )
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
                 .apply(authorizationServerConfigurer);

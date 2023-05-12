@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("oauth2.security")
 public class OAuth2Properties {
 
-    private String loginPage = "/login";
+    private String loginUrl = "/login";
+    private String logoutUrl = "/login?logout";
     private String keyPath;
     private String keyAlias;
     private String keyPass;
