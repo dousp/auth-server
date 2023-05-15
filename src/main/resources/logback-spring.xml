@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 日志级别从低到高分为TRACE < DEBUG < INFO < WARN < ERROR < FATAL，如果设置为WARN，则低于WARN的信息都不会输出 -->
+<!-- scan:当此属性设置为true时，配置文件如果发生改变，将会被重新加载，默认值为true -->
+<!-- scanPeriod:设置监测配置文件是否有修改的时间间隔，如果没有给出时间单位，默认单位是毫秒。当scan为true时，此属性生效。默认的时间间隔为1分钟。 -->
+<!-- debug:当此属性设置为true时，将打印出logback内部日志信息，实时查看logback运行状态。默认值为false。 -->
+<configuration scan="true" scanPeriod="10 seconds">
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <contextName>auth logback</contextName>
+    <!--自定义属性-->
+    <property name="log_dir" value="build/logs"/>
+    <property name="max_history" value="30" />
+    <!--日志入库的配置，这里通过springProperty标签直接读取application.yml中数据库的配置-->
+    <springProperty scope="context" name="app_name" source="spring.application.name" defaultValue="auth-default"/>
+
+
+    <!-- 控制台输出日志 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset class="java.nio.charset.Charset">${CONSOLE_LOG_CHARSET}</charset>
+        </encoder>
+    </appender>
+
+    <!--文件日志， 按照每天生成日志文件 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--SizeAndTimeBasedRollingPolicy-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名-->
+            <FileNamePattern>${log_dir}/%d{yyyy-MM-dd}/${app_name}.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <!--日志文件保留天数-->
+            <MaxHistory>${max_history}</MaxHistory>\
+            <!-- 每个日志文件到1GB的时候开始切分，最多保留20天，但最大到30GB，哪怕没到20天也要删除多余的日志 -->
+            <!--<totalSizeCap>30GB</totalSizeCap>-->
+            <!-- maxFileSize:这是活动文件的大小，默认值是10MB，测试时可改成5KB看效果 -->
+            <!--<MaxFileSize>3GB</MaxFileSize>-->
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+        <!--日志文件最大的大小-->
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>1024MB</MaxFileSize>
+        </triggeringPolicy>
+    </appender>
+
+    <!-- 异步输出 -->
+    <appender name="dayLogAsyncAppender" class="ch.qos.logback.classic.AsyncAppender">
+        <includeCallerData>true</includeCallerData>
+        <!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
+        <discardingThreshold>0</discardingThreshold>
+        <!-- 更改默认的队列的深度,该值会影响性能.默认值为256 -->
+        <queueSize>512</queueSize>
+        <appender-ref ref="FILE"/>
+    </appender>
+
+    <!--专为 spring 定制-->
+    <logger name="org.springframework" level="info"/>
+    <logger name="org.springframework.security" level="debug"/>
+    <!--<logger name="org.springframework.security.config.annotation.web" level="debug"/>-->
+    <!--<logger name="org.springframework.security.oauth2.core" level="debug"/>-->
+    <!--<logger name="org.springframework.security.oauth2.server.authorization" level="debug"/>-->
+    <logger name="org.springframework.security.jackson2" level="info"/>
+    <logger name="org.springframework.boot.autoconfigure.logging" level="error"/>
+    <logger name="com.zaxxer.hikari" level="info"/>
+    <logger name="org.thymeleaf.TemplateEngine" level="info"/>
+    <logger name="org.apache.tomcat" level="info"/>
+    <logger name="javax.management" level="info"/>
+    <logger name="sun.rmi" level="info"/>
+    <logger name="java.io" level="info"/>
+
+
+    <!-- root级别 DEBUG -->
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
+    </root>
+</configuration>

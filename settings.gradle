@@ -1,1 +1,21 @@
+// pluginManagement {
+//     repositories {
+//         gradlePluginPortal()
+//         maven { url 'https://repo.spring.io/release' }
+//         maven { url 'https://repo.spring.io/milestone' }
+//     }
+// }
+//
+// plugins {
+//     id "com.gradle.enterprise" version "3.11.1"
+//     id "io.spring.ge.conventions" version "0.0.11"
+// }
+//
+// dependencyResolutionManagement {
+//     repositories {
+//         maven { url 'https://maven.aliyun.com/repository/public/'}
+//         // mavenCentral()
+//     }
+// }
+
 rootProject.name = 'auth-server'

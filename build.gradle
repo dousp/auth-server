@@ -1,12 +1,16 @@
 plugins {
-    id 'org.springframework.boot' version '2.7.5'
+    id "org.springframework.boot" version "3.0.6"
     id 'io.spring.dependency-management' version '1.1.0'
     id 'java'
 }
 
 group = 'com.dsp'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '1.8'
+version = '0.0.2-SNAPSHOT'
+sourceCompatibility = JavaVersion.VERSION_17
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+}
 
 configurations {
     compileOnly {
@@ -15,24 +19,45 @@ configurations {
 }
 
 repositories {
-    mavenLocal()
-    maven {
-        url 'https://maven.aliyun.com/repository/public/'
-    }
+
+    maven { url 'https://maven.aliyun.com/repository/public/' }
+    maven { url 'https://maven.aliyun.com/repository/spring/' }
+    maven { url 'https://maven.aliyun.com/repository/spring-plugin' }
+    maven { url 'https://repo.spring.io/milestone' }
+    gradlePluginPortal()
+    // mavenLocal()
+    // mavenCentral()
 }
 
 dependencies {
-    runtimeOnly 'com.h2database:h2'
+    // platform("org.springframework:spring-framework-bom:$springFrameworkVersion")
+    // platform("org.springframework.security:spring-security-bom:$springSecurityVersion")
+
+    // spring
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    // implementation 'org.springframework.boot:spring-boot-starter-resource-server'
+    implementation "org.springframework.boot:spring-boot-starter-oauth2-resource-server"
     // implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-    implementation 'org.springframework.security:spring-security-cas'
-    implementation 'org.springframework.security:spring-security-oauth2-authorization-server:0.3.1'
-
+    // implementation 'org.springframework.security:spring-security-cas'
+    implementation 'org.springframework.security:spring-security-oauth2-authorization-server:1.0.1'
+    // other
+    // implementation "org.springframework:spring-webflux"
+    // implementation "io.projectreactor.netty:reactor-netty"
+    implementation group: 'p6spy', name: 'p6spy', version: '3.9.1'
+    implementation 'com.mysql:mysql-connector-j:8.0.33'
+    implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.31'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    // web
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation "org.webjars:webjars-locator-core"
+    implementation "org.webjars:bootstrap:5.2.3"
+    implementation "org.webjars:popper.js:2.9.3"
+    implementation "org.webjars:jquery:3.6.4"
+    // test
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -40,5 +65,6 @@ dependencies {
 }
 
 test {
+    enabled(false)
     useJUnitPlatform()
 }

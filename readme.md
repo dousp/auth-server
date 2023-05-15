@@ -1,6 +1,15 @@
 # 授权服务器
 
+## Upgrade to 1.0.0
+
+### 遇到的问题
+- https://github.com/spring-projects/spring-authorization-server/issues/892
+
 ## 授权码模式
+
+- 注意
+  - authorities表中要有对应User的授权信息
+  - oauth2_registered_client表中要有对应Client的授权账户信息
 
 ### 请求授权码
 - state随机生成
