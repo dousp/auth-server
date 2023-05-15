@@ -51,66 +51,76 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import java.security.KeyStore;
 import java.util.Objects;
 
-
 /**
  * 授权服务器配置
  *
  * @author shupeng.dou
  * @version 2021年12月01日 18:14
  * <p>
- * 0. spring-security-oauth2-authorization-server-*.*.*.jar
- * 1. SQL
- * \org\springframework\security\oauth2\server\authorization\client\oauth2-registered-client-schema.sql<p>
- * \org\springframework\security\oauth2\server\authorization\oauth2-authorization-consent-schema.sql<p>
- * \org\springframework\security\oauth2\server\authorization\oauth2-authorization-schema.sql<p>
+ * 0. spring-security-oauth2-authorization-server-*.*.*.jar 1. SQL
+ * \org\springframework\security\oauth2\server\authorization\client\oauth2-registered-client-schema.sql
+ * <p>
+ * \org\springframework\security\oauth2\server\authorization\oauth2-authorization-consent-schema.sql
+ * <p>
+ * \org\springframework\security\oauth2\server\authorization\oauth2-authorization-schema.sql
+ * <p>
  * <p>
  * 整理by: gitee -> xuxiaowei
  * </p>
  * @see OAuth2AuthorizationServerConfiguration OAuth 2.0 授权服务器支持的 {@link Configuration} 。
  * @see UserDetailsServiceAutoConfiguration
  * @see OAuth2AuthorizationEndpointFilter /oauth2/authorize
- * @see AuthorizationServerSettings#builder() /oauth2/authorize、/oauth2/token、/oauth2/jwks、/oauth2/revoke、/oauth2/introspect、/connect/register、/userinfo
+ * @see AuthorizationServerSettings#builder()
+ * /oauth2/authorize、/oauth2/token、/oauth2/jwks、/oauth2/revoke、/oauth2/introspect、/connect/register、/userinfo
  * @see OAuth2AuthorizationService 此接口的实现负责OAuth 2.0 Authorization(s)的管理。
- * @see InMemoryOAuth2AuthorizationService 一个 {@link OAuth2AuthorizationService} 存储 {@link OAuth2Authorization} 的内存。
- * @see JdbcOAuth2AuthorizationService {@link OAuth2AuthorizationService} 的 JDBC 实现，
- * 它使用 {@link org.springframework.jdbc.core.JdbcOperations} 进行 {@link OAuth2Authorization} 持久性。
- * @see OAuth2AuthorizationConsentService 此接口的实现负责管理 {@link OAuth2AuthorizationConsent} OAuth 2.0 Authorization Consent(s) 。
- * @see InMemoryOAuth2AuthorizationConsentService 一个 {@link OAuth2AuthorizationConsentService} 存储 {@link OAuth2AuthorizationConsent} 的内存。
- * @see JdbcOAuth2AuthorizationConsentService {@link OAuth2AuthorizationConsentService} 的 JDBC 实现，
- * 它使用 {@link org.springframework.jdbc.core.JdbcOperations} 进行 {@link OAuth2AuthorizationConsent} 持久性。
+ * @see InMemoryOAuth2AuthorizationService 一个 {@link OAuth2AuthorizationService} 存储
+ * {@link OAuth2Authorization} 的内存。
+ * @see JdbcOAuth2AuthorizationService {@link OAuth2AuthorizationService} 的 JDBC 实现， 它使用
+ * {@link org.springframework.jdbc.core.JdbcOperations} 进行 {@link OAuth2Authorization}
+ * 持久性。
+ * @see OAuth2AuthorizationConsentService 此接口的实现负责管理 {@link OAuth2AuthorizationConsent}
+ * OAuth 2.0 Authorization Consent(s) 。
+ * @see InMemoryOAuth2AuthorizationConsentService 一个
+ * {@link OAuth2AuthorizationConsentService} 存储 {@link OAuth2AuthorizationConsent} 的内存。
+ * @see JdbcOAuth2AuthorizationConsentService {@link OAuth2AuthorizationConsentService} 的
+ * JDBC 实现， 它使用 {@link org.springframework.jdbc.core.JdbcOperations} 进行
+ * {@link OAuth2AuthorizationConsent} 持久性。
  * @see RegisteredClientRepository OAuth 2.0 {@link RegisteredClient} (s) 的存储库。
- * @see InMemoryRegisteredClientRepository 在内存中存储 {@link RegisteredClientRepository} (s) 的 {@link RegisteredClient} 。
- * @see JdbcRegisteredClientRepository {@link RegisteredClientRepository} 的 JDBC 实现，
- * 它使用 {@link org.springframework.jdbc.core.JdbcOperations} 进行 {@link RegisteredClient} 持久性。
+ * @see InMemoryRegisteredClientRepository 在内存中存储 {@link RegisteredClientRepository} (s) 的
+ * {@link RegisteredClient} 。
+ * @see JdbcRegisteredClientRepository {@link RegisteredClientRepository} 的 JDBC 实现， 它使用
+ * {@link org.springframework.jdbc.core.JdbcOperations} 进行 {@link RegisteredClient} 持久性。
  * @see OidcScopes
  * @see OAuth2AuthorizationServerMetadataEndpointFilter
  * @see OAuth2ClientAuthenticationFilter OAuth 2.1 客户凭证验证
  * @see JwtClientAssertionAuthenticationConverter 基于 JWT 客户端凭据 验证
  * @see ClientSecretBasicAuthenticationConverter 基于 Basic 客户端凭据 验证
  * @see ClientSecretPostAuthenticationConverter 基于 POST 参数的 客户端凭据 验证
- * @see PublicClientAuthenticationConverter 基于 Proof Key for Code Exchange (PKCE) 对公共客户端进行身份验证
+ * @see PublicClientAuthenticationConverter 基于 Proof Key for Code Exchange (PKCE)
+ * 对公共客户端进行身份验证
  * @see OAuth2TokenGenerator OAuth2 令牌生成器
- * org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeGenerator --> not public;  OAuth2 授权码生成器
- * @see JwtGenerator 生成用于 {@link Jwt} 或 {@link OAuth2TokenGenerator} 的 {@link OAuth2AccessToken} 的 {@link OidcIdToken}。
- * @see DelegatingOAuth2TokenGenerator 一个 {@link OAuth2TokenGenerator}，它简单地委托给它的 {@link OAuth2TokenGenerator} (s) 的内部 List。
- * 每个 {@link OAuth2TokenGenerator} 都有机会使用 {@link OAuth2TokenGenerator#generate(OAuth2TokenContext)} 并返回第一个non-null OAuth2Token 。
+ * org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeGenerator
+ * --> not public; OAuth2 授权码生成器
+ * @see JwtGenerator 生成用于 {@link Jwt} 或 {@link OAuth2TokenGenerator} 的
+ * {@link OAuth2AccessToken} 的 {@link OidcIdToken}。
+ * @see DelegatingOAuth2TokenGenerator 一个 {@link OAuth2TokenGenerator}，它简单地委托给它的
+ * {@link OAuth2TokenGenerator} (s) 的内部 List。 每个 {@link OAuth2TokenGenerator} 都有机会使用
+ * {@link OAuth2TokenGenerator#generate(OAuth2TokenContext)} 并返回第一个non-null OAuth2Token 。
  * @see OAuth2AccessTokenGenerator OAuth2 访问令牌生成器
- * @see OAuth2RefreshTokenGenerator 生成 {@link OAuth2TokenGenerator} 的 {@link OAuth2RefreshToken}。
+ * @see OAuth2RefreshTokenGenerator 生成 {@link OAuth2TokenGenerator} 的
+ * {@link OAuth2RefreshToken}。
  */
 @Configuration(proxyBeanMethods = false)
 public class AuthorizationServerConfig {
 
-
     @Resource
     private OAuth2Properties properties;
 
-
     /**
-     * 授权服务器的协议端点
-     * 授权：赋予已经通过认证的客户相关权限
-     * Spring Security 过滤器链
+     * 授权服务器的协议端点 授权：赋予已经通过认证的客户相关权限 Spring Security 过滤器链
      *
-     * @see <a href="https://docs.spring.io/spring-authorization-server/docs/current/reference/html/protocol-endpoints.html">...</a>
+     * @see <a href=
+     * "https://docs.spring.io/spring-authorization-server/docs/current/reference/html/protocol-endpoints.html">...</a>
      */
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -122,40 +132,33 @@ public class AuthorizationServerConfig {
         // 有自定义了这么动
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
         authorizationServerConfigurer
-                .authorizationEndpoint(authorizationEndpoint ->
-                        authorizationEndpoint.consentPage(AuthConstants.OAUTH_CONSENT_PAGE)
-                )
+                .authorizationEndpoint(
+                        authorizationEndpoint -> authorizationEndpoint.consentPage(AuthConstants.OAUTH_CONSENT_PAGE))
                 // Enable OpenID Connect 1.0
                 .oidc(Customizer.withDefaults());
 
         RequestMatcher endpointsMatcher = authorizationServerConfigurer.getEndpointsMatcher();
         http.securityMatcher(endpointsMatcher)
-                .authorizeHttpRequests(authorize ->
-                        authorize.anyRequest().authenticated()
-                )
+                .authorizeHttpRequests(authorize -> authorize.anyRequest().authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers(endpointsMatcher))
                 // .csrf().disable()
                 .cors()
                 .and()
                 .exceptionHandling(exceptions -> exceptions
                         // 未从授权端点进行身份验证时重定向到登录页面
-                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(properties.getLoginUrl()))
-                )
+                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint(properties.getLoginUrl())))
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
                 .apply(authorizationServerConfigurer);
         return http.build();
     }
 
     /**
-     * 客户端信息持来源
-     * 授权服务器要求客户端必须是已经注册的，避免非法的客户端发起授权申请
-     * 实体： RegisteredClient
+     * 客户端信息持来源 授权服务器要求客户端必须是已经注册的，避免非法的客户端发起授权申请 实体： RegisteredClient
      *
      * @see RegisteredClientRepository 用于管理客户端的实例。
      * @see ClientAuthenticationMethod 认证方式
-     * @see AuthorizationGrantType 授权方式
-     * table: oauth2_registered_client
-     * 操作该表的JDBC服务接口： RegisteredClientRepository
+     * @see AuthorizationGrantType 授权方式 table: oauth2_registered_client 操作该表的JDBC服务接口：
+     * RegisteredClientRepository
      */
     @Bean
     public RegisteredClientRepository registeredClientRepository(JdbcTemplate jdbcTemplate) {
@@ -163,32 +166,38 @@ public class AuthorizationServerConfig {
     }
 
     /**
-     * 授权码、授权Token、刷新Token 持久化
-     * OAuth2授权信息持久化，记录授权的资源拥有者（Resource Owner）对某个客户端的某次授权记录
-     * <p>实体： OAuth2Authorization</p>
-     * <p>table: oauth2_authorization</p>
+     * 授权码、授权Token、刷新Token 持久化 OAuth2授权信息持久化，记录授权的资源拥有者（Resource Owner）对某个客户端的某次授权记录
+     * <p>
+     * 实体： OAuth2Authorization
+     * </p>
+     * <p>
+     * table: oauth2_authorization
+     * </p>
      */
     @Bean
-    public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
+    public OAuth2AuthorizationService authorizationService(JdbcTemplate jdbcTemplate,
+                                                           RegisteredClientRepository registeredClientRepository) {
         return new JdbcOAuth2AuthorizationService(jdbcTemplate, registeredClientRepository);
     }
 
     /**
-     * 确认授权持久化
-     * 资源拥有者（Resource Owner）对授权的确认信息OAuth2AuthorizationConsent的持久化
-     * resource owner已授予client的相关权限信息
-     * <p>实体：OAuth2AuthorizationConsent</p>
-     * <p>table: oauth2_authorization_consent</p>
+     * 确认授权持久化 资源拥有者（Resource Owner）对授权的确认信息OAuth2AuthorizationConsent的持久化 resource
+     * owner已授予client的相关权限信息
+     * <p>
+     * 实体：OAuth2AuthorizationConsent
+     * </p>
+     * <p>
+     * table: oauth2_authorization_consent
+     * </p>
      */
     @Bean
-    public OAuth2AuthorizationConsentService authorizationConsentService(JdbcTemplate jdbcTemplate, RegisteredClientRepository registeredClientRepository) {
+    public OAuth2AuthorizationConsentService authorizationConsentService(JdbcTemplate jdbcTemplate,
+                                                                         RegisteredClientRepository registeredClientRepository) {
         return new JdbcOAuth2AuthorizationConsentService(jdbcTemplate, registeredClientRepository);
     }
 
     /**
-     * 对JWT进行签名的加解密密钥:jks
-     * :jks
-     * :RSAKey
+     * 对JWT进行签名的加解密密钥:jks :jks :RSAKey
      *
      * @return The matching JWKs, empty list if no matches were found.
      * @see JWKSource 用于签署访问令牌的实例。
@@ -200,7 +209,8 @@ public class AuthorizationServerConfig {
         // KeyPair keyPair = generateRsaKey();
         // RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
         // RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-        // RSAKey rsaKey = new RSAKey.Builder(publicKey).privateKey(privateKey).keyID(UUID.randomUUID().toString()).build();
+        // RSAKey rsaKey = new
+        // RSAKey.Builder(publicKey).privateKey(privateKey).keyID(UUID.randomUUID().toString()).build();
         // JWKSet jwkSet = new JWKSet(rsaKey);
         // return new ImmutableJWKSet<>(jwkSet);
 
@@ -225,13 +235,8 @@ public class AuthorizationServerConfig {
     /**
      * 有需要就的话，就声明一个JwtDecoder进行定制
      * <p>
-     * iss: jwt签发者
-     * sub: jwt所面向的用户
-     * aud: 接收jwt的一方
-     * exp: jwt的过期时间，这个过期时间必须要大于签发时间
-     * nbf: 定义在什么时间之前，该jwt都是不可用的.
-     * iat: jwt的签发时间
-     * jti: jwt的唯一身份标识，主要用来作为一次性token,从而回避重放攻击
+     * iss: jwt签发者 sub: jwt所面向的用户 aud: 接收jwt的一方 exp: jwt的过期时间，这个过期时间必须要大于签发时间 nbf:
+     * 定义在什么时间之前，该jwt都是不可用的. iat: jwt的签发时间 jti: jwt的唯一身份标识，主要用来作为一次性token,从而回避重放攻击
      *
      * @param jwkSource JSON Web Key (JWK) source
      * @return JwtDecoder
@@ -263,10 +268,8 @@ public class AuthorizationServerConfig {
         };
     }
 
-
     /**
-     * 配置一些端点的路径，比如：获取token、授权端点等
-     * 这个0.4版本才有。。。。
+     * 配置一些端点的路径，比如：获取token、授权端点等 这个0.4版本才有。。。。
      */
     @Bean
     public AuthorizationServerSettings authorizationServerSettings(@Value("${server.port}") Integer port) {

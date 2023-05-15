@@ -20,4 +20,5 @@ public class DefaultController {
     public String[] getMessages() {
         return new String[]{"Message 1", "Message 2", "Message 3"};
     }
+
 }

@@ -1,3 +1,14 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/public/' }
+        // mavenCentral()
+    }
+    dependencies {
+        classpath("io.spring.javaformat:spring-javaformat-gradle-plugin:0.0.38")
+    }
+}
+
+
 plugins {
     id "org.springframework.boot" version "3.0.6"
     id 'io.spring.dependency-management' version '1.1.0'
@@ -23,15 +34,25 @@ repositories {
     maven { url 'https://maven.aliyun.com/repository/public/' }
     maven { url 'https://maven.aliyun.com/repository/spring/' }
     maven { url 'https://maven.aliyun.com/repository/spring-plugin' }
+    maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
     maven { url 'https://repo.spring.io/milestone' }
     gradlePluginPortal()
     // mavenLocal()
     // mavenCentral()
 }
 
+apply plugin: 'io.spring.javaformat'
+apply plugin: 'checkstyle'
+
+checkstyle {
+    toolVersion = "9.3"
+}
+
 dependencies {
     // platform("org.springframework:spring-framework-bom:$springFrameworkVersion")
     // platform("org.springframework.security:spring-security-bom:$springSecurityVersion")
+
+    checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.38")
 
     // spring
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -67,4 +88,9 @@ dependencies {
 test {
     enabled(false)
     useJUnitPlatform()
+}
+
+// 排除包
+tasks.withType(io.spring.javaformat.gradle.tasks.CheckFormat) {
+    exclude "package/to/exclude"
 }

@@ -1,6 +1,5 @@
 package com.dsp.auth.server.conf.handlers;
 
-
 import com.alibaba.fastjson2.JSON;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,7 +17,8 @@ import java.io.PrintWriter;
 public class SimpleAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+    public void handle(HttpServletRequest request, HttpServletResponse response,
+                       AccessDeniedException accessDeniedException) throws IOException, ServletException {
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setCharacterEncoding("utf-8");
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -28,4 +28,5 @@ public class SimpleAccessDeniedHandler implements AccessDeniedHandler {
         printWriter.flush();
         printWriter.close();
     }
+
 }

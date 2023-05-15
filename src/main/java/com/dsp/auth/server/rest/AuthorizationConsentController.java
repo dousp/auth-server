@@ -26,6 +26,7 @@ public class AuthorizationConsentController {
     private final Logger logger = LoggerFactory.getLogger(AuthorizationConsentController.class);
 
     private final RegisteredClientRepository registeredClientRepository;
+
     private final OAuth2AuthorizationConsentService authorizationConsentService;
 
     public AuthorizationConsentController(RegisteredClientRepository registeredClientRepository,
@@ -34,12 +35,11 @@ public class AuthorizationConsentController {
         this.authorizationConsentService = authorizationConsentService;
     }
 
-
     @GetMapping(value = "/oauth2/consent")
     public String consent(Principal principal, Model model,
-                                @RequestParam(OAuth2ParameterNames.CLIENT_ID) String clientId,
-                                @RequestParam(OAuth2ParameterNames.SCOPE) String scope,
-                                @RequestParam(OAuth2ParameterNames.STATE) String state) {
+                          @RequestParam(OAuth2ParameterNames.CLIENT_ID) String clientId,
+                          @RequestParam(OAuth2ParameterNames.SCOPE) String scope,
+                          @RequestParam(OAuth2ParameterNames.STATE) String state) {
 
         logger.info("come to [/oauth2/consent] path");
 
@@ -47,8 +47,8 @@ public class AuthorizationConsentController {
         Set<String> scopesToApprove = new HashSet<>();
         Set<String> previouslyApprovedScopes = new HashSet<>();
         RegisteredClient registeredClient = this.registeredClientRepository.findByClientId(clientId);
-        OAuth2AuthorizationConsent currentAuthorizationConsent =
-                this.authorizationConsentService.findById(registeredClient.getId(), principal.getName());
+        OAuth2AuthorizationConsent currentAuthorizationConsent = this.authorizationConsentService
+                .findById(registeredClient.getId(), principal.getName());
         Set<String> authorizedScopes;
         if (currentAuthorizationConsent != null) {
             authorizedScopes = currentAuthorizationConsent.getScopes();
@@ -84,33 +84,26 @@ public class AuthorizationConsentController {
     }
 
     public static class ScopeWithDescription {
+
         private static final String DEFAULT_DESCRIPTION = "UNKNOWN SCOPE -我们不能提供有关此权限的信息，请在授予此权限时谨慎使用。";
+
         private static final Map<String, String> scopeDescriptions = new HashMap<>();
         static {
-            scopeDescriptions.put(
-                    OidcScopes.PROFILE,
-                    "此应用程序将能够读取您的配置文件信息。"
-            );
-            scopeDescriptions.put(
-                    "msg.read",
-                    "此应用程序将能够读取你的信息。"
-            );
-            scopeDescriptions.put(
-                    "msg.write",
-                    "此应用程序将能够添加新的消息。它还将能够编辑和删除现有的消息。"
-            );
-            scopeDescriptions.put(
-                    "other.scope",
-                    "This is another scope example of a scope description."
-            );
+            scopeDescriptions.put(OidcScopes.PROFILE, "此应用程序将能够读取您的配置文件信息。");
+            scopeDescriptions.put("msg.read", "此应用程序将能够读取你的信息。");
+            scopeDescriptions.put("msg.write", "此应用程序将能够添加新的消息。它还将能够编辑和删除现有的消息。");
+            scopeDescriptions.put("other.scope", "This is another scope example of a scope description.");
         }
 
         public final String scope;
+
         public final String description;
 
         ScopeWithDescription(String scope) {
             this.scope = scope;
             this.description = scopeDescriptions.getOrDefault(scope, DEFAULT_DESCRIPTION);
         }
+
     }
+
 }

@@ -13,7 +13,6 @@ public class LoginController {
     @RequestMapping(path = "/login", method = RequestMethod.GET)
     public String login(HttpServletRequest request) {
 
-
         return "login";
     }
 
