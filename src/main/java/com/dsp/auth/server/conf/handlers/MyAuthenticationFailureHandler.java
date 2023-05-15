@@ -17,35 +17,37 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class MyAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(MyAuthenticationFailureHandler.class);
+	private static final Logger logger = LoggerFactory.getLogger(MyAuthenticationFailureHandler.class);
 
-    @Override
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-        // Result<String> result = null;
-        // response.setStatus(result.getStatus());
-        try {
-            // 发邮件
-            System.out.println("登录失败，发邮件...");
-            // 发短信
-            System.out.println("登录失败，发短信...");
-            // 发微信
-            System.out.println("登录失败，发微信...");
-        } catch (Exception ex) {
-            log.error(ex.getMessage(), ex);
-        }
+	@Override
+	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
+										AuthenticationException exception) throws IOException, ServletException {
+		// Result<String> result = null;
+		// response.setStatus(result.getStatus());
+		try {
+			// 发邮件
+			System.out.println("登录失败，发邮件...");
+			// 发短信
+			System.out.println("登录失败，发短信...");
+			// 发微信
+			System.out.println("登录失败，发微信...");
+		} catch (Exception ex) {
+			log.error(ex.getMessage(), ex);
+		}
 
-        renderJson(response, "MyAuthenticationFailureHandler", MediaType.APPLICATION_JSON.toString());
-    }
+		renderJson(response, "MyAuthenticationFailureHandler", MediaType.APPLICATION_JSON.toString());
+	}
 
-    public static void renderJson(HttpServletResponse response, Object obj, String type) {
-        try {
-            response.setContentType(type);
-            response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
-            response.getWriter().print(JSON.toJSONString(obj));
-            response.getWriter().flush();
-            response.getWriter().close();
-        } catch (IOException e) {
-            logger.error("Render response to Json error!");
-        }
-    }
+	public static void renderJson(HttpServletResponse response, Object obj, String type) {
+		try {
+			response.setContentType(type);
+			response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
+			response.getWriter().print(JSON.toJSONString(obj));
+			response.getWriter().flush();
+			response.getWriter().close();
+		} catch (IOException e) {
+			logger.error("Render response to Json error!");
+		}
+	}
+
 }

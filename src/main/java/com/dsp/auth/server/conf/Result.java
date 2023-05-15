@@ -13,20 +13,25 @@ public class Result<T> implements Serializable {
 
     // http状态码
     private int status;
+
     // 自定义响应编码
     private int code = 0;
+
     // 响应返回信息
     private String message;
+
     // 请求路径
     private String path;
+
     // 响应返回数据
     private T data;
+
     // 响应时间戳
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date timestamp = new Date();
+
     // 链路信息
     private String traceId;
-
 
     public Map<String, Object> toModel() {
         Map<String, Object> result = new HashMap<>(16);
@@ -39,4 +44,5 @@ public class Result<T> implements Serializable {
         result.put("traceId", this.traceId);
         return result;
     }
+
 }

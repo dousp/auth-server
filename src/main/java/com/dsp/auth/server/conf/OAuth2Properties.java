@@ -10,18 +10,23 @@ import org.springframework.context.annotation.Configuration;
 public class OAuth2Properties {
 
     private String loginUrl = "/login";
+
     private String logoutUrl = "/logout";
+
     private String keyPath;
+
     private String keyAlias;
+
     private String keyPass;
+
     /**
      * token 有效期， 分钟为单位
      */
     private Long accessTokenValidityMinutes = 30L;
+
     /**
      * refreshToken 有效期， 分钟为单位
      */
     private Long refreshTokenValidityMinutes = 180L;
-
 
 }

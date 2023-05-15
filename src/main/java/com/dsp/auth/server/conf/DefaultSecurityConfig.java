@@ -22,11 +22,10 @@ public class DefaultSecurityConfig {
     private OAuth2Properties properties;
 
     /**
-     * 配置需要认证的资源，用于身份验证
-     * 认证：对使用服务的人的身份核实
-     * Spring Security 过滤器链
+     * 配置需要认证的资源，用于身份验证 认证：对使用服务的人的身份核实 Spring Security 过滤器链
      *
-     * @see <a href="https://docs.spring.io/spring-security/reference/servlet/authentication/index.html">...</a>
+     * @see <a href=
+     * "https://docs.spring.io/spring-security/reference/servlet/authentication/index.html">...</a>
      */
     @Bean
     @Order(2)
@@ -35,19 +34,25 @@ public class DefaultSecurityConfig {
         http
                 // .securityMatcher("/index/**")
                 // .securityMatcher("/messages/**")
-                .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers(AuthConstants.DEFAULT_IGNORED_STATIC_RESOURCES).permitAll()
-                        .requestMatchers(AuthConstants.DEFAULT_WEB_STATIC_RESOURCES).permitAll()
-                        // 登录和登出需要提前排除
-                        .requestMatchers(properties.getLogoutUrl(), properties.getLoginUrl()).permitAll()
-                        // 不需要登录的url
-                        .requestMatchers(AuthConstants.DEFAULT_NO_NEED_LOGIN_RESOURCES).permitAll()
-                        .requestMatchers(AuthConstants.DEFAULT_DOC_STATIC_RESOURCES).permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                        // .requestMatchers("/index*").hasAuthority("SCOPE_msg.read")
-                        // .requestMatchers("/messages/**").hasAuthority("SCOPE_msg.read")
-                        .anyRequest().authenticated()
-                );
+                .authorizeHttpRequests(
+                        (authorize) -> authorize.requestMatchers(AuthConstants.DEFAULT_IGNORED_STATIC_RESOURCES)
+                                .permitAll()
+                                .requestMatchers(AuthConstants.DEFAULT_WEB_STATIC_RESOURCES)
+                                .permitAll()
+                                // 登录和登出需要提前排除
+                                .requestMatchers(properties.getLogoutUrl(), properties.getLoginUrl())
+                                .permitAll()
+                                // 不需要登录的url
+                                .requestMatchers(AuthConstants.DEFAULT_NO_NEED_LOGIN_RESOURCES)
+                                .permitAll()
+                                .requestMatchers(AuthConstants.DEFAULT_DOC_STATIC_RESOURCES)
+                                .permitAll()
+                                .requestMatchers(HttpMethod.OPTIONS)
+                                .permitAll()
+                                // .requestMatchers("/index*").hasAuthority("SCOPE_msg.read")
+                                // .requestMatchers("/messages/**").hasAuthority("SCOPE_msg.read")
+                                .anyRequest()
+                                .authenticated());
 
         // 允许用户使用基于表单的登录进行身份验证
         http.formLogin()
@@ -55,17 +60,13 @@ public class DefaultSecurityConfig {
                 .loginPage(properties.getLoginUrl())
                 .failureHandler(new MyAuthenticationFailureHandler())
                 .successHandler(new MyAuthenticationSuccessHandler());
-        http.logout()
-                .logoutUrl(properties.getLogoutUrl())
-                .logoutSuccessHandler(new MyLogoutSuccessHandler());
+        http.logout().logoutUrl(properties.getLogoutUrl()).logoutSuccessHandler(new MyLogoutSuccessHandler());
 
         // resource server
-        http.oauth2ResourceServer(oauth2ResourceServer ->
-                oauth2ResourceServer.jwt()
-                        .and()
-                        .accessDeniedHandler(new SimpleAccessDeniedHandler())
-                        .authenticationEntryPoint(new SimpleAuthenticationEntryPoint())
-        );
+        http.oauth2ResourceServer(oauth2ResourceServer -> oauth2ResourceServer.jwt()
+                .and()
+                .accessDeniedHandler(new SimpleAccessDeniedHandler())
+                .authenticationEntryPoint(new SimpleAuthenticationEntryPoint()));
         return http.build();
     }
 

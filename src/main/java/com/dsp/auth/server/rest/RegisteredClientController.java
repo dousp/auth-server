@@ -29,9 +29,8 @@ public class RegisteredClientController {
     }
 
     @GetMapping("/create")
-    public String createClient(){
-        RegisteredClient client = RegisteredClient
-                .withId(UUID.randomUUID().toString())
+    public String createClient() {
+        RegisteredClient client = RegisteredClient.withId(UUID.randomUUID().toString())
                 // .withId("ddd")
                 .clientId("ddd")
                 // {noop} 这个是说NoOpPasswordEncoder
@@ -53,7 +52,7 @@ public class RegisteredClientController {
                     // 这种方式过时了
                     // authorizationGrantTypes.add(AuthorizationGrantType.PASSWORD);
                 })
-                // 回调地址名单，不在此列将被拒绝 而且只能使用IP或者域名  不能使用 localhost
+                // 回调地址名单，不在此列将被拒绝 而且只能使用IP或者域名 不能使用 localhost
                 .redirectUri("https://baidu.com")
                 .redirectUri("http://127.0.0.1:8080/login/oauth2/code/messaging-client-oidc")
                 .redirectUri("http://127.0.0.1:8080/authorized")
@@ -73,8 +72,7 @@ public class RegisteredClientController {
                         .accessTokenTimeToLive(Duration.ofHours(1))
                         // refreshToken 的有效期
                         .refreshTokenTimeToLive(Duration.ofHours(3))
-                        .build()
-                )
+                        .build())
                 // 配置客户端相关的配置项，包括验证密钥或者 是否需要授权页面
                 .clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
                 .build();
@@ -83,4 +81,5 @@ public class RegisteredClientController {
         RegisteredClient client1 = registeredClientRepository.findByClientId("ddd");
         return "success, client data id: " + client1.getId();
     }
+
 }

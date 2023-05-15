@@ -13,7 +13,8 @@ import java.io.IOException;
 public class MyAuthenticationSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws ServletException, IOException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                        Authentication authentication) throws ServletException, IOException {
         super.onAuthenticationSuccess(request, response, authentication);
         try {
             // 发邮件
@@ -26,4 +27,5 @@ public class MyAuthenticationSuccessHandler extends SavedRequestAwareAuthenticat
             log.error(ex.getMessage(), ex);
         }
     }
+
 }

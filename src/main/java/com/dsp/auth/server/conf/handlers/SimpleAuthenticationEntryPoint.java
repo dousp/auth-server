@@ -19,12 +19,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
- * 在资源服务器中 不携带token 或者token无效  401
+ * 在资源服务器中 不携带token 或者token无效 401
  */
 @Slf4j
 public class SimpleAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException, IOException {
+    public void commence(HttpServletRequest request, HttpServletResponse response,
+                         AuthenticationException authException) throws IOException, ServletException, IOException {
         if (response.isCommitted()) {
             return;
         }
@@ -80,4 +82,5 @@ public class SimpleAuthenticationEntryPoint implements AuthenticationEntryPoint 
         printWriter.flush();
         printWriter.close();
     }
+
 }

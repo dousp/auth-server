@@ -13,9 +13,8 @@ import java.io.IOException;
 public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
 
     @Override
-    public void onLogoutSuccess(HttpServletRequest request,
-                                HttpServletResponse response,
-                                Authentication authentication) throws IOException, ServletException {
+    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
+            throws IOException, ServletException {
         try {
             // 发邮件
             System.out.println("Logout,发邮件事件...");
@@ -27,4 +26,5 @@ public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
             log.error(ex.getMessage(), ex);
         }
     }
+
 }
