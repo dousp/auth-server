@@ -28,6 +28,9 @@ dependencyResolutionManagement {
 
     versionCatalogs{
         libs{
+            // [ alias(libs.plugins.spring.dependency) ] repalce-> [ id 'io.spring.dependency-management' version '1.1.0' ]
+            plugin('spring-boot','org.springframework.boot').version('3.0.6')
+            plugin('spring-dependency','io.spring.dependency-management').version('1.1.0')
             library('guava','com.google.guava:guava:31.1-jre')
         }
     }
